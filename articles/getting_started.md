@@ -69,10 +69,47 @@ It is recommended to stay up-to-date with new versions. New releases and importa
 
 ## Connecting to Neo4J
 
-TBD
+### Basics
+
+Before you use Neocons, you need to connect to Neo4J Server. "Connect" here means "perform service discovery" since REST/HTTP services like Neo4J Server
+do not have a concept of persistent stateful connection, but we use a more common term for database clients here. For that, you use
+`clojurewerkz.neocons.rest/connect!` function:
+
+{% gist 860e534d79471180a5f6 %}
+
+Neocons uses implicit endpoint argument because most applications only ever use one Neo4J database.
+
+### Authenticating
+
+Neo4J REST API uses [HTTP authentication](http://www.ietf.org/rfc/rfc2617.txt) to authenticate clients. Authentication is mandatory in PaaS environments such as Heroku.
+With Neocons, you can either pass credentials as user info in the connection URL:
+
+{% gist fb98630152ad2e88ea82 %}
+
+Alternatively, if the connection URL does not have user info but `NEO4J_LOGIN` and `NEO4J_PASSWORD` environment variables are set,
+Neocons will use them.
+
+Related Neo4J Server guide: [Securing Access to Neo4J Server](http://docs.neo4j.org/chunked/stable/security-server.html)
 
 
-### Creating nodes
+## A very short intro to graph databases
+
+Graph is a data structure that represents connections (or lack of them) between things. Connected things
+are called "nodes" or "vertices" and connections are called "relationships" or "edges". Nodes may have properties
+(like person name or age), same for relationships (for example, when two people first met each other). There
+may be more than one relationships between two nodes. Relationships are directed (have a start and an end; for example,
+Web pages link to each other).
+
+
+## Creating nodes
+
+Nodes are created using the `clojurewerkz.neocons.rest.nodes/create` function:
+
+{% gist 0bb48f1ea71864e42f0e %}
+
+Nodes typically have properties. They are passed to `clojurewerkz.neocons.rest.nodes/create` as maps:
+
+{% gist 2968df2fc93b08a69c88 %}
 
 TBD
 
