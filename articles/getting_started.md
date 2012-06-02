@@ -111,30 +111,113 @@ Nodes typically have properties. They are passed to `clojurewerkz.neocons.rest.n
 
 {% gist 2968df2fc93b08a69c88 %}
 
-TBD
+### Nodes are just Clojure maps
+
+The function returns a new node which is a Clojure record but for all intents and purposes should be treated and handled
+as a map. In Neo4J, nodes have identifiers so `:id` key for created and fetched nodes is always set. Node identifiers
+are used by various Neocons API functions.
+
+Fetched nodes also have the `:location-uri` and `:data` fields. `:location-uri` returns a URI from which a node can be fetched
+again with a GET request. Location URI is typically not used by applications. `:data`, however, contains node properties
+and is very commonly used.
 
 
 ## Creating relationships
 
-TBD
+Now that we know how to create nodes, lets create two nodes representing two Web pages that link to each other and add a directed
+relationship between them:
+
+{% gist 708313e463a60e55e388 %}
+
+Relationships can have properties, just like nodes:
+
+{% gist 22edd0e9707c2ce7067c %}
+
+### Relationships are just Clojure maps
+
+Similarly to nodes, relationships are technically records with a few mandatory attributes:
+
+ * `:id`
+ * `:start`
+ * `:end`
+ * `:type`
+ * `:data`
+ * `:location-uri`
+
+`:id`, `:data` and `:location-uri` serve the same purpose as with nodes. `:start` and `:end` return location URIs of nodes on both
+ends of a relationship. `:type` returns relationship type (like "links" or "friend" or "connected-to").
+
+Just like nodes, created relationships have `:id` set on them.
+
+`clojurewerkz.neocons.rest.relationships/create-many` is a function that lets you creates multiple relationships for a node,
+all with the same direction and type. It is covered in the [Populating the graph guide](/articles/populating.html).
 
 
 ## Fetching nodes
 
-TBD
+Now that we know how to populate a small graph, lets look at how you query it. The most basic operation is to fetch
+a node by id with `clojurewerkz.neocons.rest.nodes/get`:
+
+{% gist 22edd0e9707c2ce7067c %}
+
+It returns a node value that is a Clojure map.
 
 
 ## Fetching relationships
 
-TBD
+`clojurewerkz.neocons.rest.relationships/get` fetches a single relationship by id:
+
+{% gist a7039af62c858b95b024 %}
+
+Neocons also provides other ways of fetching relationships (based on the start node and type, for example) that will be described
+in detail the [Traversing the graph](/articles/traversing.html) guide. `clojurewerkz.neocons.rest.relationships/outgoing-for` and
+`clojurewerkz.neocons.rest.relationships/incoming-for` are two such functions, lets take a look at them:
+
+{% gist 20edac3ebc3a9d9c0294 %}
+{% gist 9ff952ae3c92ecb2a5dd %}
+
+Both accept a node and a collection of relationship types you are interested in as the `:types` option, returning a collection
+of relationships.
 
 
 ## Using Cypher queries
 
-TBD
+One of the most powerful features of Neo4J is Cypher, a query language (like SQL) for querying, traversing and mutating (Neo4J Server 1.8+)
+graphs. Cypher makes queries like "return me all friends of my friends" or "return me all pages this page links to that were updated
+less than 24 hours ago" possible in a couple of lines of code. As such, operations and ad hoc queries in the Clojure REPL or Neo4J shell
+with Cypher are very common.
+
+Cypher also enables several operations Neo4J Server REST API does not provide to be executed efficiently. One common example is
+the "multi-get" operation that returns a collection of nodes by ids.
+
+Cypher queries are performed using `clojurewerkz.neocons.rest.cypher/tquery` and `clojurewerkz.neocons.rest.cypher/query` functions.
+`clojurewerkz.neocons.rest.cypher/tquery` is more common because it returns data in a more convenient tabular form, while
+`/query` returns columns and result rows separately.
+
+Covering Cypher itself is out of scope for this tutorial so lets just take a look at a couple of examples. Here is how
+to find all Amy's friends via Cypher:
+
+{% gist 8affe3de7f02779fc992 %}
+
+And here is how to get back usernames and ages of multiple people using Cypher:
+
+{% gist 9ff952ae3c92ecb2a5dd %}
+
+The latter query is roughly equivalent to
+
+{% gist c2d579a7f94f79eb24bf %}
+
+in SQL.
+
+Cypher is fundamental to Neo4J is the most powerful (and easy to use) tool for many common cases. As such, Neocons documentation
+has a whole guide dedicated to it: [The Cypher query language](/articles/cypher.html).
 
 
 ## Traversing the graph
+
+To traverse a graph means to extract information from it, often by starting at a node and following 0 or more relationships. There
+are certain well known algorithms that can be executed on graphs: for example, finding shortest path(s) between two nodes. A lot of Neo4J
+power comes from support for some of those algorithms and flexible graph traversal in general.
 
 TBD
 
@@ -142,7 +225,12 @@ TBD
 
 ## Wrapping up
 
-TBD
+Congratulations, you now can use Neocons to perform fundamental operations with Neo4J. Now you know enough to start building
+a real application. There are many features that we haven't covered here; Cypher alone is worth a long guide full of examples.
+They will be explored in the rest of the guides.
+
+We hope you find Neocons reliable, consistent and easy to use. In case you need help, please ask on the [mailing list](https://groups.google.com/forum/#!forum/clojure-neo4j)
+and follow us on Twitter [@ClojureWerkz](http://twitter.com/ClojureWerkz).
 
 
 ## What to read next
@@ -151,7 +239,9 @@ The documentation is organized as a number of guides, covering all kinds of topi
 
 We recommend that you read the following guides first, if possible, in this order:
 
- * TBD
+ * [Populating the graph](/articles/populating.html)
+ * [Traversing the graph](/articles/traversing.html)
+ * [The Cypher query language](/articles/cypher.html)
 
 
 ## Tell Us What You Think!
