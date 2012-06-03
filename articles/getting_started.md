@@ -240,7 +240,7 @@ a node to start traversing from, relationships to follow and additional options 
 
 ### Relationship traversal
 
-To perform relationship traversal, use the `clojurewerkz.neocons.rest.relationships/traverse` function. It is very similar to its 
+To perform relationship traversal, use the `clojurewerkz.neocons.rest.relationships/traverse` function. It is very similar to its
 counterpart that traverses nodes:
 
 {% gist 32e0da63195ee8f24d22 %}
@@ -270,6 +270,13 @@ Another common operation is checking whether a path between two nodes exists at 
 {% gist 13d2b968f5973c429a04 %}
 
 Relationship types that can be used (followed) during traversal are given via the `:relationships` option.
+
+
+### Traversing vs Cypher queries
+
+While traversing features are powerful, they predate a newer, more generic and even more powerful Neo4J Server feature: the Cypher query language.
+With the introduction and several revisions on Cypher, in some situations traversing the graph is no longer necessary. Please keep this in mind.
+That said, some problems are easier to solve using traversing than sophisticated Cypher queries.
 
 
 ## Wrapping up
