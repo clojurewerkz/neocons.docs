@@ -54,14 +54,14 @@ so upgrade path should be smooth in most cases.
 
 ### With Leiningen
 
-    [clojurewerkz/neocons "1.0.0-beta4"]
+    [clojurewerkz/neocons "1.0.0-rc1"]
 
 ### With Maven
 
     <dependency>
       <groupId>clojurewerkz</groupId>
       <artifactId>neocons</artifactId>
-      <version>1.0.0-beta4</version>
+      <version>1.0.0-rc1</version>
     </dependency>
 
 It is recommended to stay up-to-date with new versions. New releases and important changes are announced [@ClojureWerkz](http://twitter.com/ClojureWerkz).
