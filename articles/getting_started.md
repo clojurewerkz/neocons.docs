@@ -258,7 +258,7 @@ make it easy to determine whether a particular node or relationship belong to a 
 Finally, `clojurewerkz.neocons.rest.paths/shortest-between` and `clojurewerkz.neocons.rest.paths/all-shortest-between` calculate and return
 the shortest path(s) between two nodes.
 
-TBD: examples for all these
+For more examples, see the [Traversing the graph](/articles/traversing.html) guide.
 
 
 ### Checking if a path exists
