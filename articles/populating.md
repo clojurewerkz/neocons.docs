@@ -161,15 +161,17 @@ Similarly to node indexes, relationship indexes typically need to be created bef
 `clojurewerkz.neocons.rest.nodes/create-index` is the function to use to create a new relationship index. Just like node Indexes, relationship ones can be created with
 a specific configuration.
 
-{% gist %}
+{% gist 5099d4c99845bb9fd390 %}
+
+{% gist 54def19b3eda74eca0a8 %}
 
 To add a relationship to an index, use `clojurewerkz.neocons.rest.relationships/add-to-index`. To remove a relationship from an index, use `clojurewerkz.neocons.rest.relationships/delete-from-index`.
 
-{% gist %}
+{% gist 69af83b409b2b0ac0961 %}
 
 To look a relationship up in an exact match (not full text search) index, use `clojurewerkz.neocons.rest.relationships/find`:
 
-{% gist %}
+{% gist 78d46c020080ac620b6e %}
 
 There is also a similar function, `clojurewerkz.neocons.rest.relationships/find-one`, that works just like `find` but assumes there
 only ever going to be a single relationship with the given key in the index, so it can be returned instead of a collection with the only
@@ -177,19 +179,19 @@ value.
 
 With full text search indexes, the function to use is `clojurewerkz.neocons.rest.relationships/query`:
 
-{% gist %}
+{% gist 4e2881ce65a55c8980fc %}
 
 
 ## Deleting nodes
 
 Nodes are deleted using the `clojurewerkz.neocons.rest.nodes/delete` function:
 
-{% gist %}
+{% gist 2a7bec01c38ca5cf3800 %}
 
 Note, however, that a node only can be deleted if they have no relationships. To remove all node relationships and the node itself,
 use `clojurewerkz.neocons.rest.nodes/destroy`:
 
-{% gist %}
+{% gist 1b07c86938fbc810d0db %}
 
 `clojurewerkz.neocons.rest.nodes/delete-many` and `clojurewerkz.neocons.rest.nodes/destroy-many` are convenience functions that
 delete or destroy multiple nodes.
@@ -199,10 +201,10 @@ delete or destroy multiple nodes.
 
 Nodes are deleted using the `clojurewerkz.neocons.rest.relationships/delete` function:
 
-{% gist %}
+{% gist aa58a89314dcc1e00c4a %}
 
 `clojurewerkz.neocons.rest.relationships/maybe-delete` will delete a relationship by id but only if it exists. Otherwise it
-just does nothing.
+just does nothing. Unlike nodes, relationships can be deleted without any restrictions, so there is no `clojurewerkz.neocons.rest.relationships/destroy`.
 
 
 
