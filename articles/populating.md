@@ -77,55 +77,149 @@ all with the same direction and type. It is covered in the [Populating the graph
 
 ## Node and relationship attributes
 
-TBD
+Nodes and relationships in Neo4J have properties (attributes). It is possible for a node or relationship to not have any properties. The semantics of properties
+varies from application to application. For example, in a social application nodes that represent people may have `:name` and `:date-of-birth` properties,
+while relationships may have `:created_at` properties that store a moment in time when two people have met.
+
+### Node properties
+
+Nodes properties are passed to the `clojurewerkz.neocons.rest.nodes/create` function when a ndoe is created. In the following example, a node is created with
+two properties, `:url` and `:domain`:
+
+{% gist 2968df2fc93b08a69c88 %}
+
+
+### Updating node properties
+
+Node properties can be updated using `clojurewerkz.neocons.rest.nodes/update` that takes a node or node id and a map of properties:
+
+{% gist e87b49d6f38b8241bbfb %}
+
+It is also possible to set a single property with `clojurewerkz.neocons.rest.nodes/set-property`:
+
+{% gist 54888e2e7db956985794 %}
+
+
+### Relationship properties
+
+Relationship properties are very similar to node properties. They are passed to the `clojurewerkz.neocons.rest.relationship/create` function when a relationship is created.
+In the following example, a relationship between two nodes is created with two properties, `:link-text` and `:created-at`:
+
+{% gist 15f5b75267b2387096fd %}
+
+
+### Updating relationship properties
+
+Relationships properties can be updated using `clojurewerkz.neocons.rest.relationships/update` that takes a node or node id and a map of properties:
+
+{% gist 7d66d0bf9db06553dc16 %}
+
+It is also possible to set a single property with `clojurewerkz.neocons.rest.nodes/set-property`:
+
+{% gist 2009f34ebe2becb48475 %}
+
 
 
 ## Indexes
 
-TBD
+Indexes are data structures that data stores maintain to make certain queries significantly faster. Nodes and relationships in Neo4J are typically retrieved by
+id but this is not always convenient. Often what's needed is a way to efficiently retrieve a node by email or URL or other attribute other than `:id`. Indexes
+make that possible. In this sense Neo4J is not very different from other databases.
 
+You can index nodes and relationships and have as many indexes as you need (within the limit of Neo4J server disk and RAM resources).
 
 ### Indexing of nodes
 
-TBD
+Before nodes can be indexed, an index needs to be created. Neo4J has a feature called [automatic indexes](http://docs.neo4j.org/chunked/milestone/rest-api-auto-indexes.html) but it may be disabled via server configuration, so typically it is a good idea to just create an index and use it.
+
+`clojurewerkz.neocons.rest.nodes/create-index` is the function to use to create a new index for nodes. Indexes can be created with a specific *configuration*: it determines
+whether it is a regular or full text search index and allows for specifying [additional index parameters](http://docs.neo4j.org/chunked/milestone/indexing-create-advanced.html) (like analyzer for full text search indexes).
+
+{% gist 1e488af3c84d41bc7660 %}
+
+{% gist 9346f92533c865e3959e %}
+
+To add a node to an index, use `clojurewerkz.neocons.rest.nodes/add-to-index`. To remove a node from an index, use `clojurewerkz.neocons.rest.nodes/delete-from-index`.
+
+{% gist d1c280b81329402b4172 %}
+
+To look a node up in an exact match (not full text search) index, use `clojurewerkz.neocons.rest.nodes/find`:
+
+{% gist efcc86dff27c88e2f599 %}
+
+It returns a (possibly empty) collection of nodes found. There is also a similar function, `clojurewerkz.neocons.rest.nodes/find-one`, that works just like `find`
+but assumes there only ever going to be a single node with the given key in the index, so it can be returned instead of a collection with the only value.
+
+With full text search indexes, the function to use is `clojurewerkz.neocons.rest.nodes/query`:
+
+{% gist 3247533ad751946fd55b %}
 
 
 ### Indexing of relationships
 
-TBD
+Similarly to node indexes, relationship indexes typically need to be created before they are used.
+`clojurewerkz.neocons.rest.nodes/create-index` is the function to use to create a new relationship index. Just like node Indexes, relationship ones can be created with
+a specific configuration.
 
+{% gist %}
 
-### Fetching nodes via index
+To add a relationship to an index, use `clojurewerkz.neocons.rest.relationships/add-to-index`. To remove a relationship from an index, use `clojurewerkz.neocons.rest.relationships/delete-from-index`.
 
-TBD
+{% gist %}
 
+To look a relationship up in an exact match (not full text search) index, use `clojurewerkz.neocons.rest.relationships/find`:
 
-### Fetching relationships via index
+{% gist %}
 
-TBD
+There is also a similar function, `clojurewerkz.neocons.rest.relationships/find-one`, that works just like `find` but assumes there
+only ever going to be a single relationship with the given key in the index, so it can be returned instead of a collection with the only
+value.
+
+With full text search indexes, the function to use is `clojurewerkz.neocons.rest.relationships/query`:
+
+{% gist %}
 
 
 ## Deleting nodes
 
-TBD
+Nodes are deleted using the `clojurewerkz.neocons.rest.nodes/delete` function:
+
+{% gist %}
+
+Note, however, that a node only can be deleted if they have no relationships. To remove all node relationships and the node itself,
+use `clojurewerkz.neocons.rest.nodes/destroy`:
+
+{% gist %}
+
+`clojurewerkz.neocons.rest.nodes/delete-many` and `clojurewerkz.neocons.rest.nodes/destroy-many` are convenience functions that
+delete or destroy multiple nodes.
 
 
 ## Deleting relationships
 
-TBD
+Nodes are deleted using the `clojurewerkz.neocons.rest.relationships/delete` function:
+
+{% gist %}
+
+`clojurewerkz.neocons.rest.relationships/maybe-delete` will delete a relationship by id but only if it exists. Otherwise it
+just does nothing.
 
 
-## Updating nodes
 
-TBD
+## What to read next
 
+The documentation is organized as a number of guides, covering all kinds of topics.
 
+We recommend that you read the following guides first, if possible, in this order:
+
+ * [Traversing the graph](/articles/traversing.html)
+ * [The Cypher query language](/articles/cypher.html)
 
 
 
 ## Tell Us What You Think!
 
-Please take a moment to tell us what you think about this guide on Twitter or the [Neocons mailing list](/)
+Please take a moment to tell us what you think about this guide on Twitter or the [Neocons mailing list](https://groups.google.com/forum/#!forum/clojure-neo4j)
 
 Let us know what was unclear or what has not been covered. Maybe you do not like the guide style or grammar or discover spelling mistakes. Reader feedback is key to making the documentation better.
 
