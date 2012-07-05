@@ -110,7 +110,11 @@ Several predicate functions make it easy to determine whether a particular node 
 Finally, `clojurewerkz.neocons.rest.paths/shortest-between` and `clojurewerkz.neocons.rest.paths/all-shortest-between` calculate and return
 the shortest path(s) between two nodes.
 
-TBD: examples for all these
+An example that demonstrates several of those functions:
+
+{% gist 3ddf44d34d8b2f0b178d %}
+
+In cases when there are multiple paths of equal length, `clojurewerkz.neocons.rest.paths/shortest-between` will return just one and `clojurewerkz.neocons.rest.paths/all-shortest-between` will return all of them.
 
 
 ### Checking if a path exists
