@@ -19,8 +19,8 @@ This guide covers Neocons 1.0.0-rc3 and 1.0.x releases.
 
 ## Cypher Overview
 
-One of the most powerful features of Neo4J is Cypher, a query language (like SQL) for querying, traversing and mutating (Neo4J Server 1.8+)
-graphs. Cypher makes queries like "return me all friends of my friends" or "return me all pages this page links to that were updated
+One of the most powerful features of Neo4J is [Cypher, a query language (like SQL) for querying, traversing and mutating (Neo4J Server 1.8+)
+graphs](http://docs.neo4j.org/chunked/milestone/cypher-query-lang.html). Cypher makes queries like "return me all friends of my friends" or "return me all pages this page links to that were updated
 less than 24 hours ago" possible in a couple of lines of code. As such, operations and ad hoc queries in the Clojure REPL or Neo4J shell
 with Cypher are very common.
 
