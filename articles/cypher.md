@@ -14,7 +14,7 @@ This work is licensed under a <a rel="license" href="http://creativecommons.org/
 
 ## What version of Neocons does this guide cover?
 
-This guide covers Neocons 1.0.0-rc2 and 1.0.x releases.
+This guide covers Neocons 1.0.0-rc3 and 1.0.x releases.
 
 
 ## Cypher Overview
