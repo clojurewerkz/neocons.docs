@@ -12,6 +12,7 @@ layout: article
  * Indexing of relationships
  * Deleting nodes
  * Deleting relationships
+ * Performing batch operations via Neo4J REST API
 
 
 This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by/3.0/">Creative Commons Attribution 3.0 Unported License</a> (including images & stylesheets). The source is available [on Github](https://github.com/clojurewerkz/neocons.docs).
@@ -225,6 +226,13 @@ Nodes are deleted using the `clojurewerkz.neocons.rest.relationships/delete` fun
 `clojurewerkz.neocons.rest.relationships/maybe-delete` will delete a relationship by id but only if it exists. Otherwise it
 just does nothing. Unlike nodes, relationships can be deleted without any restrictions, so there is no `clojurewerkz.neocons.rest.relationships/destroy`.
 
+
+## Performing batch operations via Neo4J REST API
+
+Neocons 1.0.0-rc3 and later supports batch operations via Neo4J REST API. The API is fairly low level but is very efficient (can handle millions of
+operations per request). To use it, you pass a collection of maps to `clojurewerkz.neocons.rest.batch/perform`:
+
+{% gist 67e0f2748d5a81e2d7ac %}
 
 
 ## What to read next
