@@ -33,6 +33,17 @@ Nodes typically have properties. They are passed to `clojurewerkz.neocons.rest.n
 
 {% gist 2968df2fc93b08a69c88 %}
 
+### Efficiently creating a large number of nodes
+
+It is possible to efficiently insert a large number of nodes (up to hundreds of thousands of millions) in a single request using
+the `clojurewerkz.neocons.rest.nodes/create-batch` function:
+
+{% gist 13f1c5ca92a304a46ffd %}
+
+It returns a lazy sequence of results, so if you want to retrieve them all at once, force the evaluation with
+[clojure.core/doall](http://clojuredocs.org/clojure_core/clojure.core/doall).
+
+
 ### Nodes are just Clojure maps
 
 The function returns a new node which is a Clojure record but for all intents and purposes should be treated and handled
