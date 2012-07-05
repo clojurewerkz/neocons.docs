@@ -19,7 +19,7 @@ This work is licensed under a <a rel="license" href="http://creativecommons.org/
 
 ## What version of Neocons does this guide cover?
 
-This guide covers Neocons 1.0.0-rc2 and 1.0.x releases.
+This guide covers Neocons 1.0.0-rc3 and 1.0.x releases.
 
 
 
@@ -143,6 +143,10 @@ To add a node to an index, use `clojurewerkz.neocons.rest.nodes/add-to-index`. T
 
 {% gist d1c280b81329402b4172 %}
 
+To add a node to an index [as unique](http://docs.neo4j.org/chunked/stable/rest-api-unique-indexes.html), pass one more argument to `clojurewerkz.neocons.rest.nodes/add-to-index`:
+
+{% gist cb6e53040b5777240b9c %}
+
 To look a node up in an exact match (not full text search) index, use `clojurewerkz.neocons.rest.nodes/find`:
 
 {% gist efcc86dff27c88e2f599 %}
@@ -168,6 +172,10 @@ a specific configuration.
 To add a relationship to an index, use `clojurewerkz.neocons.rest.relationships/add-to-index`. To remove a relationship from an index, use `clojurewerkz.neocons.rest.relationships/delete-from-index`.
 
 {% gist 69af83b409b2b0ac0961 %}
+
+To add a relationship to an index [as unique](http://docs.neo4j.org/chunked/stable/rest-api-unique-indexes.html), pass one more argument to `clojurewerkz.neocons.rest.relationships/add-to-index`:
+
+{% gist f3a475b9650e6ccc7c02 %}
 
 To look a relationship up in an exact match (not full text search) index, use `clojurewerkz.neocons.rest.relationships/find`:
 
