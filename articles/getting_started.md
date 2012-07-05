@@ -246,9 +246,9 @@ counterpart that traverses nodes:
 {% gist 32e0da63195ee8f24d22 %}
 
 
-### Working with Paths
+### Working with paths
 
-To perform relationship traversal, use the `clojurewerkz.neocons.rest.paths/traverse` function. Several predicate functions
+To perform a path traversal, use the `clojurewerkz.neocons.rest.paths/traverse` function. Several predicate functions
 make it easy to determine whether a particular node or relationship belong to a path:
 
 * `clojurewerkz.neocons.rest.paths/node-in?`,
