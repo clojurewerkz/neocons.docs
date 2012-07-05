@@ -24,6 +24,10 @@ To traverse a graph means to extract information from it, often by starting at a
 are certain well known algorithms that can be executed on graphs: for example, finding shortest path(s) between two nodes. A lot of Neo4J
 power comes from support for some of those algorithms and flexible graph traversal in general.
 
+Note that as the [Cypher query language](http://docs.neo4j.org/chunked/milestone/cypher-query-lang.html) matures, the traversal API becomes less frequently used and may be considered to be "low level" (in comparison).
+As such, please evaluate if your task at hand can be solved with a [Cypher query which Neocons supports](/articles/cypher.html).
+In the future, more and more functionality in Neocons will be refactored to use Cypher internally.
+
 ### Traversal overview
 
 Traversing the graph means following relationships between nodes and accumulating nodes (node traversal) or relationships (relationship
@@ -43,9 +47,16 @@ a node to start traversing from, relationships to follow and additional options 
 
 {% gist 29db4ea258a66676c534 %}
 
+Accepted options are:
 
-TBD: more options, more examples
+ * `:order` (a string, default: `"breadth_first"`)
+ * `:uniqueness` (a string, default: `"node_global"`): `"node_global"`, `"none"`, `"relationship_global"`, `"node_path"`, `"relationship_path"`
+ * `:max-depth` (an integer, no default)
+ * `:return-filter` (a map, default: `{:language "builtin" :name "all"}`): a map with a language the traversal is in (typically builtin) and the name of the filter (builtin filters: `"all"`, `"all_but_start_node"`). Defines a named filter for the traversal.
+ * `:prune-evaluator` (a map, default: `{:language "builtin" :name "none"}`)
+ * `:relationships` (a map, no default): a map with two mandatory keys, `:direction` and `:type` that specifies what relationships should be followed during the traversal. Example: `{:direction "all" :type "friend"}`. Direction can be one of: `"all"`, `"in"` or `"out"`. 
 
+For more information, see the [Neo4J REST API traversals guide](http://docs.neo4j.org/chunked/milestone/rest-api-traverse.html).
 
 ### Relationship traversal
 
@@ -54,13 +65,43 @@ counterpart that traverses nodes:
 
 {% gist 32e0da63195ee8f24d22 %}
 
-TBD: more options, more examples
+Accepted options are:
+
+ * `:order` (a string, default: `"breadth_first"`): specifies what tranversal order to use: [depth first](http://en.wikipedia.org/wiki/Depth-first_search) or [breadth first](http://en.wikipedia.org/wiki/Breadth-first_search)
+ * `:uniqueness` (a string, default: `"node_global"`)
+ * `:max-depth` (an integer, no default)
+ * `:return-filter` (a map, default: `{:language "builtin" :name "all"}`)
+ * `:prune-evaluator` (a map, default: `{:language "builtin" :name "none"}`)
+ * `:relationships` (a map, no default): a map with two mandatory keys, `:direction` and `:type` that specifies what relationships should be followed during the traversal. Example: `{:direction "all" :type "friend"}`.
+
+For more information, see the [Neo4J REST API traversals guide](http://docs.neo4j.org/chunked/milestone/rest-api-traverse.html).
 
 
-### Working with Paths
+### Working with paths
 
-To perform relationship traversal, use the `clojurewerkz.neocons.rest.paths/traverse` function. Several predicate functions
-make it easy to determine whether a particular node or relationship belong to a path:
+Path in a graph is a sequence of nodes and relationships. A path has a start (a node) and an end (also a node). Paths are finite and always have length associated with
+them. A lot of power of graph databases comes from efficient calculation of paths (for example, shortest paths).
+
+Paths in Neocons are represented as immutable Clojure maps (technically, `clojurewerkz.neocons.rest.records.Path` record instances) that are guaranteed
+to have several attributes:
+
+ * `:start`: a URI that points to the ending point (always a node) in this path. You can fetch the node using the `clojurewerkz.neocons.rest.nodes/fetch-from` function
+ * `:end`: a URI that points to the ending point (always a node) in this path. You can fetch the node using the `clojurewerkz.neocons.rest.nodes/fetch-from` function
+ * `:length`: a length of this path as an integer
+ * `:nodes`: a collection of node records on this path
+ * `:relationships`: a collection of relationship records on this path
+
+
+### Path traversals
+
+Path traversals walk the graph, follow certain relationships, accumulate nodes/relationships/segments and return them as paths.
+To perform a path traversal, use the `clojurewerkz.neocons.rest.paths/traverse` function:
+
+{% gist 411b49bf933b2fbe3859 %}
+
+### Path predicates
+
+Several predicate functions make it easy to determine whether a particular node or relationship belong to a path:
 
 * `clojurewerkz.neocons.rest.paths/node-in?`,
 * `clojurewerkz.neocons.rest.paths/relationship-in?`
