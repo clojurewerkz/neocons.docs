@@ -19,7 +19,7 @@ This work is licensed under a <a rel="license" href="http://creativecommons.org/
 
 ## What version of Neocons does this guide cover?
 
-This guide covers Neocons 1.0.0-rc3 and 1.0.x releases.
+This guide covers Neocons 1.0.x.
 
 
 ## Neocons Overview
@@ -54,14 +54,20 @@ so upgrade path should be smooth in most cases.
 
 ### With Leiningen
 
-    [clojurewerkz/neocons "1.0.0-rc3"]
+    [clojurewerkz/neocons "1.0.0"]
 
 ### With Maven
+
+Add Clojars repository definition to your `pom.xml`:
+
+{% gist 65642c4b53d26539e5f6 %}
+
+And then the dependency:
 
     <dependency>
       <groupId>clojurewerkz</groupId>
       <artifactId>neocons</artifactId>
-      <version>1.0.0-rc3</version>
+      <version>1.0.0</version>
     </dependency>
 
 It is recommended to stay up-to-date with new versions. New releases and important changes are announced [@ClojureWerkz](http://twitter.com/ClojureWerkz).
