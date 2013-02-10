@@ -5,7 +5,7 @@ layout: article
 
 ## Guide list
 
-[Neocons documentation](https://github.com/clojurewerkz/) is organized as a number of guides, covering all kinds of topics.
+[Neocons documentation](https://github.com/clojurewerkz/neocons.docs) is organized as a number of guides, covering all kinds of topics.
 
 We recommend that you read these guides, if possible, in this order:
 
