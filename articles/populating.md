@@ -251,22 +251,3 @@ We recommend that you read the following guides first, if possible, in this orde
 Please take a moment to tell us what you think about this guide on Twitter or the [Neocons mailing list](https://groups.google.com/forum/#!forum/clojure-neo4j)
 
 Let us know what was unclear or what has not been covered. Maybe you do not like the guide style or grammar or discover spelling mistakes. Reader feedback is key to making the documentation better.
-
-
-
-## What to read next
-
-The documentation is organized as a number of guides, covering all kinds of topics.
-
-We recommend that you read the following guides first, if possible, in this order:
-
- * [Traversing the graph](/articles/traversing.html)
- * [The Cypher query language](/articles/cypher.html)
-
-
-
-## Tell Us What You Think!
-
-Please take a moment to tell us what you think about this guide on Twitter or the [Neocons mailing list](https://groups.google.com/forum/#!forum/clojure-neo4j)
-
-Let us know what was unclear or what has not been covered. Maybe you do not like the guide style or grammar or discover spelling mistakes. Reader feedback is key to making the documentation better.
