@@ -19,7 +19,7 @@ This work is licensed under a <a rel="license" href="http://creativecommons.org/
 
 ## What version of Neocons does this guide cover?
 
-This guide covers Neocons 1.0.x.
+This guide covers Neocons 1.1.x.
 
 
 ## Neocons Overview
@@ -54,7 +54,7 @@ so upgrade path should be smooth in most cases.
 
 ### With Leiningen
 
-    [clojurewerkz/neocons "1.0.3"]
+    [clojurewerkz/neocons "1.1.0"]
 
 ### With Maven
 
@@ -67,7 +67,7 @@ And then the dependency:
     <dependency>
       <groupId>clojurewerkz</groupId>
       <artifactId>neocons</artifactId>
-      <version>1.0.3</version>
+      <version>1.1.0</version>
     </dependency>
 
 It is recommended to stay up-to-date with new versions. New releases and important changes are announced [@ClojureWerkz](http://twitter.com/ClojureWerkz).
@@ -103,7 +103,7 @@ Related Neo4J Server guide: [Securing Access to Neo4J Server](http://docs.neo4j.
 Graph is a data structure that represents connections (or lack of them) between things. Connected things
 are called "nodes" or "vertices" and connections are called "relationships" or "edges". Nodes may have properties
 (like person name or age), same for relationships (for example, when two people first met each other). There
-may be more than one relationships between two nodes. Relationships are directed (have a start and an end; for example,
+may be more than one relationship between two nodes. Relationships are directed (have a start and an end; for example,
 Web pages link to each other).
 
 
