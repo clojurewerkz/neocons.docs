@@ -54,23 +54,34 @@ so upgrade path should be smooth in most cases.
 
 ### With Leiningen
 
-    [clojurewerkz/neocons "1.1.0"]
+``` clojure
+[clojurewerkz/neocons "1.1.0"]
+```
 
 ### With Maven
 
 Add Clojars repository definition to your `pom.xml`:
 
-{% gist 65642c4b53d26539e5f6 %}
+``` xml
+<repository>
+  <id>clojars.org</id>
+  <url>http://clojars.org/repo</url>
+</repository>
+```
 
 And then the dependency:
 
-    <dependency>
-      <groupId>clojurewerkz</groupId>
-      <artifactId>neocons</artifactId>
-      <version>1.1.0</version>
-    </dependency>
+``` xml
+<dependency>
+  <groupId>clojurewerkz</groupId>
+  <artifactId>neocons</artifactId>
+  <version>1.1.0</version>
+</dependency>
+```
 
-It is recommended to stay up-to-date with new versions. New releases and important changes are announced [@ClojureWerkz](http://twitter.com/ClojureWerkz).
+It is recommended to stay up-to-date with new versions. New releases
+and important changes are announced
+[@ClojureWerkz](http://twitter.com/ClojureWerkz).
 
 
 ## Connecting to Neo4J
@@ -81,7 +92,13 @@ Before you use Neocons, you need to connect to Neo4J Server. "Connect" here mean
 do not have a concept of persistent stateful connection, but we use a more common term for database clients here. For that, you use
 `clojurewerkz.neocons.rest/connect!` function:
 
-{% gist 860e534d79471180a5f6 %}
+``` clojure
+(ns neocons.docs.examples
+  (:require [clojurewerkz.neocons.rest :as nr]))
+
+;; connects to the default Neo4J Server host/port/path
+(nr/connect! "http://localhost:7474/db/data/")
+```
 
 Neocons uses implicit endpoint argument because most applications only ever use one Neo4J database.
 
@@ -90,7 +107,14 @@ Neocons uses implicit endpoint argument because most applications only ever use 
 Neo4J REST API uses [HTTP authentication](http://www.ietf.org/rfc/rfc2617.txt) to authenticate clients. Authentication is mandatory in PaaS environments such as Heroku.
 With Neocons, you can either pass credentials as user info in the connection URL:
 
-{% gist fb98630152ad2e88ea82 %}
+``` clojure
+(ns neocons.docs.examples
+  (:require [clojurewerkz.neocons.rest :as nr]))
+
+;; connects to a Neo4J Server neo4j.megacorp.internal with
+;; username of "neocons" and password of "SEcRe7"
+(nr/connect! "http://neocons:SEcRe7@neo4j.megacorp.internal/db/data/")
+```
 
 Alternatively, if the connection URL does not have user info but `NEO4J_LOGIN` and `NEO4J_PASSWORD` environment variables are set,
 Neocons will use them.
@@ -111,11 +135,33 @@ Web pages link to each other).
 
 Nodes are created using the `clojurewerkz.neocons.rest.nodes/create` function:
 
-{% gist 0bb48f1ea71864e42f0e %}
+``` clojure
+(ns neocons.docs.examples
+  (:require [clojurewerkz.neocons.rest :as nr]
+            [clojurewerkz.neocons.rest.nodes :as nn]))
+
+(defn -main
+  [& args]
+  (nr/connect! "http://localhost:7474/db/data/")
+  ;; creates a node without properties
+  (let [node (nn/create)]
+    (println node)))
+```
 
 Nodes typically have properties. They are passed to `clojurewerkz.neocons.rest.nodes/create` as maps:
 
-{% gist 2968df2fc93b08a69c88 %}
+``` clojure
+(ns neocons.docs.examples
+  (:require [clojurewerkz.neocons.rest :as nr]
+            [clojurewerkz.neocons.rest.nodes :as nn]))
+
+(defn -main
+  [& args]
+  (nr/connect! "http://localhost:7474/db/data/")
+  ;; creates a node wit two properties
+  (let [node (nn/create {:url "http://clojureneo4j.info" :domain "clojureneo4j.info"})]
+    (println node)))
+```
 
 ### Nodes are just Clojure maps
 
@@ -133,11 +179,39 @@ and is very commonly used.
 Now that we know how to create nodes, lets create two nodes representing two Web pages that link to each other and add a directed
 relationship between them:
 
-{% gist 708313e463a60e55e388 %}
+``` clojure
+(ns neocons.docs.examples
+  (:require [clojurewerkz.neocons.rest :as nr]
+            [clojurewerkz.neocons.rest.nodes :as nn]
+            [clojurewerkz.neocons.rest.relationships :as nrl]))
+
+(defn -main
+  [& args]
+  (nr/connect! "http://localhost:7474/db/data/")
+  (let [page1 (nn/create {:url "http://clojurewerkz.org"})
+        page2 (nn/create {:url "http://clojureneo4j.info"})
+        ;; a relationship that indicates that page1 links to page2
+        rel   (nrl/create page1 page2 :links)]
+    (println rel)))
+```
 
 Relationships can have properties, just like nodes:
 
-{% gist 22edd0e9707c2ce7067c %}
+``` clojure
+(ns neocons.docs.examples
+  (:require [clojurewerkz.neocons.rest :as nr]
+            [clojurewerkz.neocons.rest.nodes :as nn]
+            [clojurewerkz.neocons.rest.relationships :as nrl]))
+
+(defn -main
+  [& args]
+  (nr/connect! "http://localhost:7474/db/data/")
+  (let [amy (nn/create {:username "amy"})
+        bob (nn/create {:username "bob"})
+        rel (nrl/create amy bob :friend {:source "college"})]
+    (println (nn/get (:id amy)))
+    (println (nn/get (:id bob)))))
+```
 
 ### Relationships are just Clojure maps
 
@@ -164,7 +238,21 @@ all with the same direction and type. It is covered in the [Populating the graph
 Now that we know how to populate a small graph, lets look at how you query it. The most basic operation is to fetch
 a node by id with `clojurewerkz.neocons.rest.nodes/get`:
 
-{% gist 22edd0e9707c2ce7067c %}
+``` clojure
+(ns neocons.docs.examples
+  (:require [clojurewerkz.neocons.rest :as nr]
+            [clojurewerkz.neocons.rest.nodes :as nn]
+            [clojurewerkz.neocons.rest.relationships :as nrl]))
+
+(defn -main
+  [& args]
+  (nr/connect! "http://localhost:7474/db/data/")
+  (let [amy (nn/create {:username "amy"})
+        bob (nn/create {:username "bob"})
+        rel (nrl/create amy bob :friend {:source "college"})]
+    (println (nn/get (:id amy)))
+    (println (nn/get (:id bob)))))
+```
 
 It returns a node value that is a Clojure map.
 
@@ -173,14 +261,56 @@ It returns a node value that is a Clojure map.
 
 `clojurewerkz.neocons.rest.relationships/get` fetches a single relationship by id:
 
-{% gist a7039af62c858b95b024 %}
+``` clojure
+(ns neocons.docs.examples
+  (:require [clojurewerkz.neocons.rest :as nr]
+            [clojurewerkz.neocons.rest.nodes :as nn]
+            [clojurewerkz.neocons.rest.relationships :as nrl]))
+
+(defn -main
+  [& args]
+  (nr/connect! "http://localhost:7474/db/data/")
+  (let [amy (nn/create {:username "amy"})
+        bob (nn/create {:username "bob"})
+        rel (nrl/create amy bob :friend {:source "college"})]
+    (println (nrl/get (:id rel)))))
+```
 
 Neocons also provides other ways of fetching relationships (based on the start node and type, for example) that will be described
 in detail the [Traversing the graph](/articles/traversing.html) guide. `clojurewerkz.neocons.rest.relationships/outgoing-for` and
 `clojurewerkz.neocons.rest.relationships/incoming-for` are two such functions, lets take a look at them:
 
-{% gist 20edac3ebc3a9d9c0294 %}
-{% gist 9ff952ae3c92ecb2a5dd %}
+``` clojure
+(ns neocons.docs.examples
+  (:require [clojurewerkz.neocons.rest :as nr]
+            [clojurewerkz.neocons.rest.nodes :as nn]
+            [clojurewerkz.neocons.rest.relationships :as nrl]))
+
+(defn -main
+  [& args]
+  (nr/connect! "http://localhost:7474/db/data/")
+  (let [amy (nn/create {:username "amy"})
+        bob (nn/create {:username "bob"})
+        _   (nrl/create amy bob :friend {:source "college"})]
+    (println (nrl/outgoing-for amy :types [:friend]))))
+```
+
+``` clojure
+(ns neocons.docs.examples
+  (:require [clojurewerkz.neocons.rest :as nr]
+            [clojurewerkz.neocons.rest.nodes :as nn]
+            [clojurewerkz.neocons.rest.relationships :as nrl]
+            [clojurewerkz.neocons.rest.cypher :as cy]))
+
+(defn -main
+  [& args]
+  (nr/connect! "http://localhost:7474/db/data/")
+  (let [amy (nn/create {:username "amy" :age 27})
+        bob (nn/create {:username "bob" :age 28})
+        _   (nrl/create amy bob :friend {:source "college"})
+        res (cy/tquery "START x = node({ids}) RETURN x.username, x.age" {:ids (map :id [amy bob])})]
+    (println res)))
+```
 
 Both accept a node and a collection of relationship types you are interested in as the `:types` option, returning a collection
 of relationships.
@@ -203,15 +333,47 @@ Cypher queries are performed using `clojurewerkz.neocons.rest.cypher/tquery` and
 Covering Cypher itself is out of scope for this tutorial so lets just take a look at a couple of examples. Here is how
 to find all Amy's friends via Cypher:
 
-{% gist 8affe3de7f02779fc992 %}
+``` clojure
+(ns neocons.docs.examples
+  (:require [clojurewerkz.neocons.rest :as nr]
+            [clojurewerkz.neocons.rest.nodes :as nn]
+            [clojurewerkz.neocons.rest.relationships :as nrl]
+            [clojurewerkz.neocons.rest.cypher :as cy]))
+
+(defn -main
+  [& args]
+  (nr/connect! "http://localhost:7474/db/data/")
+  (let [amy (nn/create {:username "amy"})
+        bob (nn/create {:username "bob"})
+        _   (nrl/create amy bob :friend {:source "college"})
+        res (cy/tquery "START person=node({sid}) MATCH person-[:friend]->friend RETURN friend" {:sid (:id amy)})]
+    (println res)))
+```
 
 And here is how to get back usernames and ages of multiple people using Cypher:
 
-{% gist 9ff952ae3c92ecb2a5dd %}
+``` clojure
+(ns neocons.docs.examples
+  (:require [clojurewerkz.neocons.rest :as nr]
+            [clojurewerkz.neocons.rest.nodes :as nn]
+            [clojurewerkz.neocons.rest.relationships :as nrl]
+            [clojurewerkz.neocons.rest.cypher :as cy]))
+
+(defn -main
+  [& args]
+  (nr/connect! "http://localhost:7474/db/data/")
+  (let [amy (nn/create {:username "amy" :age 27})
+        bob (nn/create {:username "bob" :age 28})
+        _   (nrl/create amy bob :friend {:source "college"})
+        res (cy/tquery "START x = node({ids}) RETURN x.username, x.age" {:ids (map :id [amy bob])})]
+    (println res)))
+```
 
 The latter query is roughly equivalent to
 
-{% gist c2d579a7f94f79eb24bf %}
+``` sql
+SELECT username, age FROM nodes WHERE id IN (…);
+```
 
 in SQL.
 
@@ -241,7 +403,22 @@ when to terminate the traversal and so on.
 Node traversal with Neoncons is performed using the `clojurewerkz.neocons.rest.nodes/traverse` function. It takes several arguments:
 a node to start traversing from, relationships to follow and additional options like what nodes to return:
 
-{% gist 29db4ea258a66676c534 %}
+``` clojure
+(ns neocons.docs.examples
+  (:require [clojurewerkz.neocons.rest :as nr]
+            [clojurewerkz.neocons.rest.nodes :as nn]
+            [clojurewerkz.neocons.rest.relationships :as nrl]))
+
+(defn -main
+  [& args]
+  (nr/connect! "http://localhost:7474/db/data/")
+  (let [john (nn/create {:name "John"})
+        adam (nn/create {:name "Alan"})
+        pete (nn/create {:name "Peter"})
+        _    (nrl/create john adam :friend)
+        _    (nrl/create adam pete :friend)]
+    (println (nn/traverse (:id john) :relationships [{:direction "out" :type "friend"}] :return-filter {:language "builtin" :name "all_but_start_node"})))
+```
 
 
 ### Relationship traversal
@@ -249,7 +426,22 @@ a node to start traversing from, relationships to follow and additional options 
 To perform relationship traversal, use the `clojurewerkz.neocons.rest.relationships/traverse` function. It is very similar to its
 counterpart that traverses nodes:
 
-{% gist 32e0da63195ee8f24d22 %}
+``` clojure
+(ns neocons.docs.examples
+  (:require [clojurewerkz.neocons.rest :as nr]
+            [clojurewerkz.neocons.rest.nodes :as nn]
+            [clojurewerkz.neocons.rest.relationships :as nrl]))
+
+(defn -main
+  [& args]
+  (nr/connect! "http://localhost:7474/db/data/")
+  (let [john (nn/create {:name "John"})
+        adam (nn/create {:name "Alan"})
+        pete (nn/create {:name "Peter"})
+        _    (nrl/create john adam :friend)
+        _    (nrl/create adam pete :friend)]
+    (println (nrl/traverse (:id john) :relationships [{:direction "out" :type "friend"}])))
+```
 
 
 ### Working with paths
@@ -273,7 +465,24 @@ Another common operation is checking whether a path between two nodes exists at 
 
 `clojurewerkz.neocons.rest.paths/exists-between?` checks whether there is a path from node A to node B:
 
-{% gist 13d2b968f5973c429a04 %}
+``` clojure
+(ns neocons.docs.examples
+  (:require [clojurewerkz.neocons.rest :as nr]
+            [clojurewerkz.neocons.rest.nodes :as nn]
+            [clojurewerkz.neocons.rest.relationships :as nrl]
+            [clojurewerkz.neocons.rest.paths :as np]))
+
+(defn -main
+  [& args]
+  (nr/connect! "http://localhost:7474/db/data/")
+  (let [john (nodes/create {:name "John"})
+        beth (nodes/create {:name "Elizabeth"})
+        gael (nodes/create {:name "Gaël"})
+        _    (relationships/create john beth :knows)
+        _    (relationships/create beth gael :knows)
+        rt   {:type "knows" :direction "out"}]
+    (println (np/exists-between? (:id john) (:id gael) :relationships [rt] :max-depth 3))))
+```
 
 Relationship types that can be used (followed) during traversal are given via the `:relationships` option.
 
@@ -308,6 +517,10 @@ We recommend that you read the following guides first, if possible, in this orde
 
 ## Tell Us What You Think!
 
-Please take a moment to tell us what you think about this guide on Twitter or the [Neocons mailing list](https://groups.google.com/forum/#!forum/clojure-neo4j)
+Please take a moment to tell us what you think about this guide on
+Twitter or the [Neocons mailing
+list](https://groups.google.com/forum/#!forum/clojure-neo4j)
 
-Let us know what was unclear or what has not been covered. Maybe you do not like the guide style or grammar or discover spelling mistakes. Reader feedback is key to making the documentation better.
+Let us know what was unclear or what has not been covered. Maybe you
+do not like the guide style or grammar or discover spelling
+mistakes. Reader feedback is key to making the documentation better.
