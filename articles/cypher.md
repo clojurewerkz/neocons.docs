@@ -34,15 +34,47 @@ Cypher queries are performed using `clojurewerkz.neocons.rest.cypher/tquery` and
 Covering Cypher itself is out of scope for this tutorial so lets just take a look at a couple of examples. Here is how
 to find all Amy's friends via Cypher:
 
-{% gist 8affe3de7f02779fc992 %}
+``` clojure
+(ns neocons.docs.examples
+  (:require [clojurewerkz.neocons.rest :as nr]
+            [clojurewerkz.neocons.rest.nodes :as nn]
+            [clojurewerkz.neocons.rest.relationships :as nrl]
+            [clojurewerkz.neocons.rest.cypher :as cy]))
+
+(defn -main
+  [& args]
+  (nr/connect! "http://localhost:7474/db/data/")
+  (let [amy (nn/create {:username "amy"})
+        bob (nn/create {:username "bob"})
+        _   (nrl/create amy bob :friend {:source "college"})
+        res (cy/tquery "START person=node({sid}) MATCH person-[:friend]->friend RETURN friend" {:sid (:id amy)})]
+    (println res)))
+```
 
 And here is how to get back usernames and ages of multiple people using Cypher:
 
-{% gist 9ff952ae3c92ecb2a5dd %}
+``` clojure
+(ns neocons.docs.examples
+  (:require [clojurewerkz.neocons.rest :as nr]
+            [clojurewerkz.neocons.rest.nodes :as nn]
+            [clojurewerkz.neocons.rest.relationships :as nrl]
+            [clojurewerkz.neocons.rest.cypher :as cy]))
+
+(defn -main
+  [& args]
+  (nr/connect! "http://localhost:7474/db/data/")
+  (let [amy (nn/create {:username "amy" :age 27})
+        bob (nn/create {:username "bob" :age 28})
+        _   (nrl/create amy bob :friend {:source "college"})
+        res (cy/tquery "START x = node({ids}) RETURN x.username, x.age" {:ids (map :id [amy bob])})]
+    (println res)))
+```
 
 The latter query is roughly equivalent to
 
-{% gist c2d579a7f94f79eb24bf %}
+``` sql
+SELECT username, age FROM nodes WHERE id IN (…);
+```
 
 in SQL.
 
