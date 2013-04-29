@@ -28,18 +28,56 @@ This guide covers Neocons 1.1.x.
 
 Nodes are created using the `clojurewerkz.neocons.rest.nodes/create` function:
 
-{% gist 0bb48f1ea71864e42f0e %}
+``` clojure
+(ns neocons.docs.examples
+  (:require [clojurewerkz.neocons.rest :as nr]
+            [clojurewerkz.neocons.rest.nodes :as nn]))
+
+(defn -main
+  [& args]
+  (nr/connect! "http://localhost:7474/db/data/")
+  ;; creates a node without properties
+  (let [node (nn/create)]
+    (println node)))
+```
 
 Nodes typically have properties. They are passed to `clojurewerkz.neocons.rest.nodes/create` as maps:
 
-{% gist 2968df2fc93b08a69c88 %}
+``` clojure
+(ns neocons.docs.examples
+  (:require [clojurewerkz.neocons.rest :as nr]
+            [clojurewerkz.neocons.rest.nodes :as nn]))
+
+(defn -main
+  [& args]
+  (nr/connect! "http://localhost:7474/db/data/")
+  ;; creates a node wit two properties
+  (let [node (nn/create {:url "http://clojureneo4j.info" :domain "clojureneo4j.info"})]
+    (println node)))
+```
 
 ### Efficiently creating a large number of nodes
 
 It is possible to efficiently insert a large number of nodes (up to hundreds of thousands of millions) in a single request using
 the `clojurewerkz.neocons.rest.nodes/create-batch` function:
 
-{% gist 13f1c5ca92a304a46ffd %}
+``` clojure
+(ns neocons.docs.examples
+  (:require [clojurewerkz.neocons.rest :as nr]
+            [clojurewerkz.neocons.rest.nodes :as nn]))
+
+(defn -main
+  [& args]
+  (nr/connect! "http://localhost:7474/db/data/")
+  ;; efficiently insert a batch of nodes, can handle hunreds of thousands or even millions of
+  ;; nodes with reasonably small heaps. Returns a lazy sequence, for it with clojure.core/doall
+  ;; if you want to parse & calculate the entire response at once.
+  (let [nodes (nn/create-batch [{:url "http://clojureneo4j.info" :domain "clojureneo4j.info"}
+                                {:url "http://clojuremongodb.info" :domain "clojuremongodb.info"}
+                                {:url "http://clojureriak.info" :domain "clojureriak.info"}])]
+    ;; printing here will force the lazy response sequence to be evaluated
+    (println nodes)))
+```
 
 It returns a lazy sequence of results, so if you want to retrieve them all at once, force the evaluation with
 [clojure.core/doall](http://clojuredocs.org/clojure_core/clojure.core/doall).
@@ -61,11 +99,39 @@ and is very commonly used.
 Now that we know how to create nodes, lets create two nodes representing two Web pages that link to each other and add a directed
 relationship between them:
 
-{% gist 708313e463a60e55e388 %}
+``` clojure
+(ns neocons.docs.examples
+  (:require [clojurewerkz.neocons.rest :as nr]
+            [clojurewerkz.neocons.rest.nodes :as nn]
+            [clojurewerkz.neocons.rest.relationships :as nrl]))
+
+(defn -main
+  [& args]
+  (nr/connect! "http://localhost:7474/db/data/")
+  (let [page1 (nn/create {:url "http://clojurewerkz.org"})
+        page2 (nn/create {:url "http://clojureneo4j.info"})
+        ;; a relationship that indicates that page1 links to page2
+        rel   (nrl/create page1 page2 :links)]
+    (println rel)))
+```
 
 Relationships can have properties, just like nodes:
 
-{% gist 22edd0e9707c2ce7067c %}
+``` clojure
+(ns neocons.docs.examples
+  (:require [clojurewerkz.neocons.rest :as nr]
+            [clojurewerkz.neocons.rest.nodes :as nn]
+            [clojurewerkz.neocons.rest.relationships :as nrl]))
+
+(defn -main
+  [& args]
+  (nr/connect! "http://localhost:7474/db/data/")
+  (let [amy (nn/create {:username "amy"})
+        bob (nn/create {:username "bob"})
+        rel (nrl/create amy bob :friend {:source "college"})]
+    (println (nn/get (:id amy)))
+    (println (nn/get (:id bob)))))
+```
 
 ### Relationships are just Clojure maps
 
@@ -98,18 +164,55 @@ while relationships may have `:created_at` properties that store a moment in tim
 Nodes properties are passed to the `clojurewerkz.neocons.rest.nodes/create` function when a ndoe is created. In the following example, a node is created with
 two properties, `:url` and `:domain`:
 
-{% gist 2968df2fc93b08a69c88 %}
+``` clojure
+(ns neocons.docs.examples
+  (:require [clojurewerkz.neocons.rest :as nr]
+            [clojurewerkz.neocons.rest.nodes :as nn]))
+
+(defn -main
+  [& args]
+  (nr/connect! "http://localhost:7474/db/data/")
+  ;; creates a node wit two properties
+  (let [node (nn/create {:url "http://clojureneo4j.info" :domain "clojureneo4j.info"})]
+    (println node)))
+```
 
 
 ### Updating node properties
 
 Node properties can be updated using `clojurewerkz.neocons.rest.nodes/update` that takes a node or node id and a map of properties:
 
-{% gist e87b49d6f38b8241bbfb %}
+``` clojure
+(ns neocons.docs.examples
+  (:require [clojurewerkz.neocons.rest :as nr]
+            [clojurewerkz.neocons.rest.nodes :as nn]))
+
+(defn -main
+  [& args]
+  (nr/connect! "http://localhost:7474/db/data/")
+  ;; creates a node and updates its properties
+  (let [node (nn/create {:url "http://clojureneo4j.info"})]
+    (println node)
+    (nn/update (:id node) {:url "http://clojureneo4j.info" :domain "clojureneo4j.info"})
+    (println "After the update: " node)))
+```
 
 It is also possible to set a single property with `clojurewerkz.neocons.rest.nodes/set-property`:
 
-{% gist 54888e2e7db956985794 %}
+``` clojure
+(ns neocons.docs.examples
+  (:require [clojurewerkz.neocons.rest :as nr]
+            [clojurewerkz.neocons.rest.nodes :as nn]))
+
+(defn -main
+  [& args]
+  (nr/connect! "http://localhost:7474/db/data/")
+  ;; creates a node and updates a single property
+  (let [node (nn/create {:url "http://clojureneo4j.info"})]
+    (println node)
+    (nn/set-property (:id node) :domain "clojureneo4j.info")
+    (println "After the update: " node)))
+```
 
 
 ### Relationship properties
@@ -117,18 +220,63 @@ It is also possible to set a single property with `clojurewerkz.neocons.rest.nod
 Relationship properties are very similar to node properties. They are passed to the `clojurewerkz.neocons.rest.relationship/create` function when a relationship is created.
 In the following example, a relationship between two nodes is created with two properties, `:link-text` and `:created-at`:
 
-{% gist 15f5b75267b2387096fd %}
+``` clojure
+(ns neocons.docs.examples
+  (:require [clojurewerkz.neocons.rest :as nr]
+            [clojurewerkz.neocons.rest.nodes :as nn]
+            [clojurewerkz.neocons.rest.nodes :as nrel]))
+
+(defn -main
+  [& args]
+  (nr/connect! "http://localhost:7474/db/data/")
+  (let [node1 (nn/create {:url "http://clojurewerkz.org"})
+        node2 (nn/create {:url "http://clojureneo4j.info"})
+        ;; creates a relationships of type :links with two properties
+        rel   (nrel/create node1 node2 :links {:link-text "Neocons" :created-at "2012-07-03T19:40:27.269-00:00"})]
+    (println rel)))
+```
 
 
 ### Updating relationship properties
 
 Relationships properties can be updated using `clojurewerkz.neocons.rest.relationships/update` that takes a node or node id and a map of properties:
 
-{% gist 7d66d0bf9db06553dc16 %}
+``` clojure
+(ns neocons.docs.examples
+  (:require [clojurewerkz.neocons.rest :as nr]
+            [clojurewerkz.neocons.rest.nodes :as nn]
+            [clojurewerkz.neocons.rest.nodes :as nrel]))
+
+(defn -main
+  [& args]
+  (nr/connect! "http://localhost:7474/db/data/")
+  (let [node1 (nn/create {:url "http://clojurewerkz.org"})
+        node2 (nn/create {:url "http://clojureneo4j.info"})
+        rel   (nrel/create node1 node2 :links)]
+    (println node)
+    (nn/update (:id rel) {:link-text "Neocons" :created-at "2012-07-03T19:40:27.269-00:00"})
+    (println "After the update: " node)))
+```
 
 It is also possible to set a single property with `clojurewerkz.neocons.rest.nodes/set-property`:
 
-{% gist 2009f34ebe2becb48475 %}
+``` clojure
+(ns neocons.docs.examples
+  (:require [clojurewerkz.neocons.rest :as nr]
+            [clojurewerkz.neocons.rest.nodes :as nn]
+            [clojurewerkz.neocons.rest.nodes :as nrel]))
+
+(defn -main
+  [& args]
+  (nr/connect! "http://localhost:7474/db/data/")
+  ;; sets a single relationship property
+  (let [node1 (nn/create {:url "http://clojurewerkz.org"})
+        node2 (nn/create {:url "http://clojureneo4j.info"})
+        rel   (nrel/create node1 node2 :links)]
+    (println node)
+    (nn/set-property (:id rel) :link-text "Neocons")
+    (println "After the update: " node)))
+```
 
 
 
@@ -147,28 +295,105 @@ Before nodes can be indexed, an index needs to be created. Neo4J has a feature c
 `clojurewerkz.neocons.rest.nodes/create-index` is the function to use to create a new index for nodes. Indexes can be created with a specific *configuration*: it determines
 whether it is a regular or full text search index and allows for specifying [additional index parameters](http://docs.neo4j.org/chunked/milestone/indexing-create-advanced.html) (like analyzer for full text search indexes).
 
-{% gist 1e488af3c84d41bc7660 %}
+``` clojure
+(ns neocons.docs.examples
+  (:require [clojurewerkz.neocons.rest :as nr]
+            [clojurewerkz.neocons.rest.nodes :as nn]))
 
-{% gist 9346f92533c865e3959e %}
+(defn -main
+  [& args]
+  (nr/connect! "http://localhost:7474/db/data/")
+  (let [idx (nn/create-index "by-name")]
+    (println idx)))
+```
+
+``` clojure
+(ns neocons.docs.examples
+  (:require [clojurewerkz.neocons.rest :as nr]
+            [clojurewerkz.neocons.rest.nodes :as nn]))
+
+(defn -main
+  [& args]
+  (nr/connect! "http://localhost:7474/db/data/")
+  ;; creates a new full text search index with the given analyzer
+  (let [idx (nn/create-index "imported" {:type "fulltext" :provider "lucene" :analyzer  "org.neo4j.index.impl.lucene.LowerCaseKeywordAnalyzer"})]
+    (println idx)))
+```
 
 To add a node to an index, use `clojurewerkz.neocons.rest.nodes/add-to-index`. To remove a node from an index, use `clojurewerkz.neocons.rest.nodes/delete-from-index`.
 
-{% gist d1c280b81329402b4172 %}
+``` clojure
+(ns neocons.docs.examples
+  (:require [clojurewerkz.neocons.rest :as nr]
+            [clojurewerkz.neocons.rest.nodes :as nn]))
+
+(defn -main
+  [& args]
+  (nr/connect! "http://localhost:7474/db/data/")
+  (let [idx  (nn/create-index "by-username")
+        node (nn/create {:username "joe"})]
+    (nn/add-to-index (:id node) (:name idx) "username" "joe")))
+```
 
 To add a node to an index [as unique](http://docs.neo4j.org/chunked/stable/rest-api-unique-indexes.html), pass one more argument to `clojurewerkz.neocons.rest.nodes/add-to-index`:
 
-{% gist cb6e53040b5777240b9c %}
+``` clojure
+(ns neocons.docs.examples
+  (:require [clojurewerkz.neocons.rest :as nr]
+            [clojurewerkz.neocons.rest.nodes :as nn]))
+
+(defn -main
+  [& args]
+  (nr/connect! "http://localhost:7474/db/data/")
+  ;; create a unique index
+  (let [idx  (nn/create-index "by-username" {:unique true})
+        node (nn/create {:username "joe"})]
+    ;; add a node to the index as unique
+    (nn/add-to-index (:id node) (:name idx) "username" "joe" true)))
+```
 
 To look a node up in an exact match (not full text search) index, use `clojurewerkz.neocons.rest.nodes/find`:
 
-{% gist efcc86dff27c88e2f599 %}
+``` clojure
+(ns neocons.docs.examples
+  (:require [clojurewerkz.neocons.rest :as nr]
+            [clojurewerkz.neocons.rest.nodes :as nn]))
+
+(defn -main
+  [& args]
+  (nr/connect! "http://localhost:7474/db/data/")
+  (let [puma  (nn/create {:name "Puma"  :hq-location "Herzogenaurach, Germany"})
+        apple (nn/create {:name "Apple" :hq-location "Cupertino, CA, USA"})
+        idx   (nn/create-index "companies")]
+    (nn/delete-from-index (:id puma)  (:name idx))
+    (nn/delete-from-index (:id apple) (:name idx))
+    (nn/add-to-index (:id puma)  (:name idx) "country" "Germany")
+    (nn/add-to-index (:id apple) (:name idx) "country" "United States of America")
+    (println (nn/query (:name idx) "country:Germany"))))
+```
 
 It returns a (possibly empty) collection of nodes found. There is also a similar function, `clojurewerkz.neocons.rest.nodes/find-one`, that works just like `find`
 but assumes there only ever going to be a single node with the given key in the index, so it can be returned instead of a collection with the only value.
 
 With full text search indexes, the function to use is `clojurewerkz.neocons.rest.nodes/query`:
 
-{% gist 3247533ad751946fd55b %}
+``` clojure
+(ns neocons.docs.examples
+  (:require [clojurewerkz.neocons.rest :as nr]
+            [clojurewerkz.neocons.rest.nodes :as nn]))
+
+(defn -main
+  [& args]
+  (nr/connect! "http://localhost:7474/db/data/")
+  (let [puma  (nn/create {:name "Puma"  :hq-location "Herzogenaurach, Germany"})
+        apple (nn/create {:name "Apple" :hq-location "Cupertino, CA, USA"})
+        idx   (nn/create-index "companies")]
+    (nn/delete-from-index (:id puma)  (:name idx))
+    (nn/delete-from-index (:id apple) (:name idx))
+    (nn/add-to-index (:id puma)  (:name idx) "country" "Germany")
+    (nn/add-to-index (:id apple) (:name idx) "country" "United States of America")
+    (println (nn/query (:name idx) "country:Germany"))))
+```
 
 
 ### Indexing of relationships
@@ -177,21 +402,91 @@ Similarly to node indexes, relationship indexes typically need to be created bef
 `clojurewerkz.neocons.rest.nodes/create-index` is the function to use to create a new relationship index. Just like node Indexes, relationship ones can be created with
 a specific configuration.
 
-{% gist 5099d4c99845bb9fd390 %}
+``` clojure
+(ns neocons.docs.examples
+  (:require [clojurewerkz.neocons.rest :as nr]
+            [clojurewerkz.neocons.rest.nodes :as nn]
+            [clojurewerkz.neocons.rest.relationships :as nrel]))
 
-{% gist 54def19b3eda74eca0a8 %}
+(defn -main
+  [& args]
+  (nr/connect! "http://localhost:7474/db/data/")
+  (let [node1 (nn/create {:url "http://clojureneo4j.info"})
+        node2 (nn/create {:url "http://clojureneo4j.info"})
+        rel   (nrel/create node1 node2 :links {:link-text "Neocons"})
+        idx   (nrel/create-index "by-link-text" {:type "exact"})]
+    (println idx)))
+```
+
+``` clojure
+(ns neocons.docs.examples
+  (:require [clojurewerkz.neocons.rest :as nr]
+            [clojurewerkz.neocons.rest.relationships :as nrel]))
+
+(defn -main
+  [& args]
+  (nr/connect! "http://localhost:7474/db/data/")
+  ;; creates a new full text search index with the given analyzer
+  (let [idx (nrel/create-index "imported" {:type "fulltext" :provider "lucene" :analyzer  "org.neo4j.index.impl.lucene.LowerCaseKeywordAnalyzer"})]
+    (println idx)))
+```
 
 To add a relationship to an index, use `clojurewerkz.neocons.rest.relationships/add-to-index`. To remove a relationship from an index, use `clojurewerkz.neocons.rest.relationships/delete-from-index`.
 
-{% gist 69af83b409b2b0ac0961 %}
+``` clojure
+(ns neocons.docs.examples
+  (:require [clojurewerkz.neocons.rest :as nr]
+            [clojurewerkz.neocons.rest.nodes :as nn]
+            [clojurewerkz.neocons.rest.relationships :as nrel]))
+
+(defn -main
+  [& args]
+  (nr/connect! "http://localhost:7474/db/data/")
+  (let [node1 (nn/create {:url "http://clojureneo4j.info"})
+        node2 (nn/create {:url "http://clojureneo4j.info"})
+        rel   (nrel/create node1 node2 :links {:link-text "Neocons"})
+        idx   (nrel/create-index "by-link-text")]
+    (nrel/add-to-index (:id rel) (:idx name) :link-text "Neocons")
+    (println rel)))
+```
 
 To add a relationship to an index [as unique](http://docs.neo4j.org/chunked/stable/rest-api-unique-indexes.html), pass one more argument to `clojurewerkz.neocons.rest.relationships/add-to-index`:
 
-{% gist f3a475b9650e6ccc7c02 %}
+``` clojure
+(ns neocons.docs.examples
+  (:require [clojurewerkz.neocons.rest :as nr]
+            [clojurewerkz.neocons.rest.nodes :as nn]
+            [clojurewerkz.neocons.rest.relationships :as nrel]))
+
+(defn -main
+  [& args]
+  (nr/connect! "http://localhost:7474/db/data/")
+  (let [node1 (nn/create {:url "http://clojureneo4j.info"})
+        node2 (nn/create {:url "http://clojureneo4j.info"})
+        rel   (nrel/create node1 node2 :links {:link-text "Neocons"})
+        idx   (nrel/create-index "by-link-text" {:unique true})]
+    (nrel/add-to-index (:id rel) (:idx name) :link-text "Neocons" true)
+    (println rel)))
+```
 
 To look a relationship up in an exact match (not full text search) index, use `clojurewerkz.neocons.rest.relationships/find`:
 
-{% gist 78d46c020080ac620b6e %}
+``` clojure
+(ns neocons.docs.examples
+  (:require [clojurewerkz.neocons.rest :as nr]
+            [clojurewerkz.neocons.rest.nodes :as nn]
+            [clojurewerkz.neocons.rest.relationships :as nrel]))
+
+(defn -main
+  [& args]
+  (nr/connect! "http://localhost:7474/db/data/")
+  (let [node1 (nn/create {:url "http://clojureneo4j.info"})
+        node2 (nn/create {:url "http://clojureneo4j.info"})
+        rel   (nrel/create node1 node2 :links {:link-text "Neocons"})
+        idx   (nrel/create-index "by-link-text")]
+    (nrel/add-to-index (:id rel) (:idx name) :link-text "Neocons")
+    (println (nrel/find (:name idx) :link-text "Neocons"))))
+```
 
 There is also a similar function, `clojurewerkz.neocons.rest.relationships/find-one`, that works just like `find` but assumes there
 only ever going to be a single relationship with the given key in the index, so it can be returned instead of a collection with the only
@@ -199,19 +494,56 @@ value.
 
 With full text search indexes, the function to use is `clojurewerkz.neocons.rest.relationships/query`:
 
-{% gist 4e2881ce65a55c8980fc %}
+``` clojure
+(ns neocons.docs.examples
+  (:require [clojurewerkz.neocons.rest :as nr]
+            [clojurewerkz.neocons.rest.nodes :as nn]
+            [clojurewerkz.neocons.rest.relationships :as nrel]))
+
+(defn -main
+  [& args]
+  (nr/connect! "http://localhost:7474/db/data/")
+  (let [node1 (nn/create {:url "http://clojureneo4j.info"})
+        node2 (nn/create {:url "http://clojureneo4j.info"})
+        rel   (nrel/create node1 node2 :links {:link-text "Neocons"})
+        idx   (nrel/create-index "by-link-text" {:type "fulltext"})]
+    (nrel/add-to-index (:id rel) (:idx name) :link-text "Neocons is an idiomatic Clojure client for the Neo4J Server REST interface")
+    (println (nrel/query (:name idx) "link-text:*idiomatic*"))))
+```
 
 
 ## Deleting nodes
 
 Nodes are deleted using the `clojurewerkz.neocons.rest.nodes/delete` function:
 
-{% gist 2a7bec01c38ca5cf3800 %}
+``` clojure
+(ns neocons.docs.examples
+  (:require [clojurewerkz.neocons.rest :as nr]
+            [clojurewerkz.neocons.rest.nodes :as nn]))
+
+(defn -main
+  [& args]
+  (nr/connect! "http://localhost:7474/db/data/")
+  ;; creates a node wit two properties
+  (let [node (nn/create {:url "http://clojureneo4j.info" :domain "clojureneo4j.info"})]
+    (nn/delete (:id node)))
+```
 
 Note, however, that a node only can be deleted if they have no relationships. To remove all node relationships and the node itself,
 use `clojurewerkz.neocons.rest.nodes/destroy`:
 
-{% gist 1b07c86938fbc810d0db %}
+``` clojure
+(ns neocons.docs.examples
+  (:require [clojurewerkz.neocons.rest :as nr]
+            [clojurewerkz.neocons.rest.nodes :as nn]))
+
+(defn -main
+  [& args]
+  (nr/connect! "http://localhost:7474/db/data/")
+  ;; creates a node wit two properties
+  (let [node (nn/create {:url "http://clojureneo4j.info" :domain "clojureneo4j.info"})]
+    (nn/destroy node))
+```
 
 `clojurewerkz.neocons.rest.nodes/delete-many` and `clojurewerkz.neocons.rest.nodes/destroy-many` are convenience functions that
 delete or destroy multiple nodes.
@@ -221,7 +553,20 @@ delete or destroy multiple nodes.
 
 Nodes are deleted using the `clojurewerkz.neocons.rest.relationships/delete` function:
 
-{% gist aa58a89314dcc1e00c4a %}
+``` clojure
+(ns neocons.docs.examples
+  (:require [clojurewerkz.neocons.rest :as nr]
+            [clojurewerkz.neocons.rest.nodes :as nn]
+            [clojurewerkz.neocons.rest.nodes :as nrel]))
+
+(defn -main
+  [& args]
+  (nr/connect! "http://localhost:7474/db/data/")
+  (let [node1 (nn/create {:url "http://clojurewerkz.org"})
+        node2 (nn/create {:url "http://clojureneo4j.info"})
+        rel   (nrel/create node1 node2 :links {:link-text "Neocons"})]
+    (nrel/delete rel)))
+```
 
 `clojurewerkz.neocons.rest.relationships/maybe-delete` will delete a relationship by id but only if it exists. Otherwise it
 just does nothing. Unlike nodes, relationships can be deleted without any restrictions, so there is no `clojurewerkz.neocons.rest.relationships/destroy`.
@@ -232,7 +577,35 @@ just does nothing. Unlike nodes, relationships can be deleted without any restri
 Neocons 1.0.0-rc3 and later supports batch operations via Neo4J REST API. The API is fairly low level but is very efficient (can handle millions of
 operations per request). To use it, you pass a collection of maps to `clojurewerkz.neocons.rest.batch/perform`:
 
-{% gist 67e0f2748d5a81e2d7ac %}
+``` clojure
+(ns neocons.docs.examples
+  (:require [clojurewerkz.neocons.rest :as nr]
+            [clojurewerkz.neocons.rest.nodes :as nn]))
+
+(defn -main
+  [& args]
+  (nr/connect! "http://localhost:7474/db/data/")
+  ;; efficiently executes a batch of operations in a single HTTP request, can handle hunreds of thousands or even millions of
+  ;; nodes with reasonably small heaps. Returns a lazy sequence, for it with clojure.core/doall
+  ;; if you want to parse & calculate the entire response at once.
+  (let [ops [{:method "POST"
+              :to     "/node"
+              :body   {}
+              :id     0}
+             {:method "POST"
+              :to     "/node"
+              :body   {}
+              :id     1}
+             {:method "POST",
+              :to     "{0}/relationships",
+              :body   {:to   "{1}"
+                       :data {}
+                       :type "knows"}
+              :id     2}]
+        res (doall (b/perform ops))]
+    ;; printing here will force the lazy response sequence to be evaluated
+    (println res)))
+```
 
 
 ## What to read next
@@ -248,6 +621,10 @@ We recommend that you read the following guides first, if possible, in this orde
 
 ## Tell Us What You Think!
 
-Please take a moment to tell us what you think about this guide on Twitter or the [Neocons mailing list](https://groups.google.com/forum/#!forum/clojure-neo4j)
+Please take a moment to tell us what you think about this guide on
+Twitter or the [Neocons mailing
+list](https://groups.google.com/forum/#!forum/clojure-neo4j)
 
-Let us know what was unclear or what has not been covered. Maybe you do not like the guide style or grammar or discover spelling mistakes. Reader feedback is key to making the documentation better.
+Let us know what was unclear or what has not been covered. Maybe you
+do not like the guide style or grammar or discover spelling
+mistakes. Reader feedback is key to making the documentation better.
