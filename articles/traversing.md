@@ -45,7 +45,22 @@ when to terminate the traversal and so on.
 Node traversal with Neoncons is performed using the `clojurewerkz.neocons.rest.nodes/traverse` function. It takes several arguments:
 a node to start traversing from, relationships to follow and additional options like what nodes to return:
 
-{% gist 29db4ea258a66676c534 %}
+``` clojure
+(ns neocons.docs.examples
+  (:require [clojurewerkz.neocons.rest :as nr]
+            [clojurewerkz.neocons.rest.nodes :as nn]
+            [clojurewerkz.neocons.rest.relationships :as nrl]))
+
+(defn -main
+  [& args]
+  (nr/connect! "http://localhost:7474/db/data/")
+  (let [john (nn/create {:name "John"})
+        adam (nn/create {:name "Alan"})
+        pete (nn/create {:name "Peter"})
+        _    (nrl/create john adam :friend)
+        _    (nrl/create adam pete :friend)]
+    (println (nn/traverse (:id john) :relationships [{:direction "out" :type "friend"}] :return-filter {:language "builtin" :name "all_but_start_node"})))
+```
 
 Accepted options are:
 
@@ -63,7 +78,22 @@ For more information, see the [Neo4J REST API traversals guide](http://docs.neo4
 To perform relationship traversal, use the `clojurewerkz.neocons.rest.relationships/traverse` function. It is very similar to its
 counterpart that traverses nodes:
 
-{% gist 32e0da63195ee8f24d22 %}
+``` clojure
+(ns neocons.docs.examples
+  (:require [clojurewerkz.neocons.rest :as nr]
+            [clojurewerkz.neocons.rest.nodes :as nn]
+            [clojurewerkz.neocons.rest.relationships :as nrl]))
+
+(defn -main
+  [& args]
+  (nr/connect! "http://localhost:7474/db/data/")
+  (let [john (nn/create {:name "John"})
+        adam (nn/create {:name "Alan"})
+        pete (nn/create {:name "Peter"})
+        _    (nrl/create john adam :friend)
+        _    (nrl/create adam pete :friend)]
+    (println (nrl/traverse (:id john) :relationships [{:direction "out" :type "friend"}])))
+```
 
 Accepted options are:
 
@@ -97,7 +127,40 @@ to have several attributes:
 Path traversals walk the graph, follow certain relationships, accumulate nodes/relationships/segments and return them as paths.
 To perform a path traversal, use the `clojurewerkz.neocons.rest.paths/traverse` function:
 
-{% gist 411b49bf933b2fbe3859 %}
+``` clojure
+(ns neocons.docs.examples
+  (:require [clojurewerkz.neocons.rest :as nr]
+            [clojurewerkz.neocons.rest.nodes :as nn]
+            [clojurewerkz.neocons.rest.relationships :as nrel]))
+
+(defn -main
+  [& args]
+  (nr/connect! "http://localhost:7474/db/data/")
+  (let [john (nodes/create {:name "John"})
+        adam (nodes/create {:name "Alan"})
+        pete (nodes/create {:name "Peter"})
+        rel1 (relationships/create john adam :friend)
+        rel2 (relationships/create adam pete :friend)
+        xs1  (paths/traverse (:id john) :relationships [{:direction "all" :type "friend"}])
+        xs2  (paths/traverse (:id john) :relationships [{:direction "all" :type "enemy"}])]
+    (println xs1)
+    (println xs2)
+    (let [path1 (first xs1)
+          path2 (second xs1)
+          path3 (last xs1)]
+      ;= 0
+      (println (:length path1))
+      ;= 1
+      (println (:length path2))
+      ;= 2
+      (println (:length path3))
+      ;= 1
+      (println (count (:nodes path1)))
+      ;= same as (:location-uri john)
+      (println (:start path1))
+      ;= same as (:location-uri pete)
+      (println (:end   path3)))))
+```
 
 ### Path predicates
 
@@ -112,7 +175,119 @@ the shortest path(s) between two nodes.
 
 An example that demonstrates several of those functions:
 
-{% gist 3ddf44d34d8b2f0b178d %}
+``` clojure
+(ns neocons.docs.examples
+  (:require [clojurewerkz.neocons.rest :as nr]
+            [clojurewerkz.neocons.rest.nodes :as nn]
+            [clojurewerkz.neocons.rest.relationships :as nrels]
+            [clojurewerkz.neocons.rest.paths         :as paths]))
+
+(defn -main
+  [& args]
+  (nr/connect! "http://localhost:7474/db/data/")
+  ;; a longer example that demonstrates several functions related to paths
+  (let [john (nodes/create {:name "John" :age 28 :location "New York City, NY"})
+        liz  (nodes/create {:name "Liz"  :age 27 :location "Buffalo, NY"})
+        beth (nodes/create {:name "Elizabeth" :age 30 :location "Chicago, IL"})
+        bern (nodes/create {:name "Bernard"   :age 33 :location "Zürich"})
+        gael (nodes/create {:name "Gaël"      :age 31 :location "Montpellier"})
+        alex (nodes/create {:name "Alex"      :age 24 :location "Toronto, ON"})
+        rel1 (nrel/create john liz  :knows)
+        rel2 (nrel/create liz  beth :knows)
+        rel3 (nrel/create liz  bern :knows)
+        rel4 (nrel/create bern gael :knows)
+        rel5 (nrel/create gael beth :knows)
+        rel6 (nrel/create beth gael :knows)
+        rel7 (nrel/create john gael :knows)
+        rt   {:type "knows" :direction "out"}
+        xs1   (paths/all-shortest-between (:id john) (:id liz)  :relationships [rt] :max-depth 1)
+        path1 (first xs1)
+        xs2   (paths/all-shortest-between (:id john) (:id beth) :relationships [rt] :max-depth 1)
+        xs3   (paths/all-shortest-between (:id john) (:id beth) :relationships [rt] :max-depth 2)
+        path3 (first xs3)
+        xs4   (paths/all-shortest-between (:id john) (:id beth) :relationships [rt] :max-depth 3)
+        path4 (first xs4)
+        xs5   (paths/all-shortest-between (:id john) (:id beth) :relationships [rt] :max-depth 7)
+        path5 (first xs5)
+        path6 (last  xs5)
+        path7 (paths/shortest-between (:id john) (:id beth) :relationships [rt] :max-depth 7)
+        path8 (paths/shortest-between (:id john) (:id beth) :relationships [rt] :max-depth 1)
+        path9 (paths/shortest-between (:id john) (:id alex) :relationships [rt] :max-depth 1)]
+    ;= true    
+    (println (empty? xs2))
+    ;= nil    
+    (println path8)
+    ;= true
+    (println (= 1 (count xs1)))
+    ;= true    
+    (println (= 2 (count xs3)))
+    ;= true    
+    (println (= 2 (count xs4)))
+    ;= true    
+    (println (= 2 (count xs5)))
+    ;= true    
+    (println (= (:start path1) (:location-uri john)))
+    ;= true    
+    (println (= (:end   path1) (:location-uri liz)))
+    ;= true    
+    (println (= 2 (:length path3)))
+    ;= true    
+    (println (= (:start path3) (:location-uri john)))
+    ;= true    
+    (println (= (:end   path3) (:location-uri beth)))
+    ;= true    
+    (println (= 2 (:length path4)))
+    ;= true    
+    (println (= (:start path4) (:location-uri john)))
+    ;= true    
+    (println (= (:end   path4) (:location-uri beth)))
+    ;= true    
+    (println (= 2 (:length path5)))
+    ;= true    
+    (println (= (:start path5) (:location-uri john)))
+    ;= true    
+    (println (= (:end   path5) (:location-uri beth)))
+    ;= true    
+    (println (= 2 (:length path6)))
+    ;= true    
+    (println (= (:start path6) (:location-uri john)))
+    ;= true    
+    (println (= (:end   path6) (:location-uri beth)))
+    ;= true    
+    (println (= 2 (:length path7)))
+    ;= true    
+    (println (= (:start path7) (:location-uri john)))
+    ;= true    
+    (println (= (:end   path7) (:location-uri beth)))
+    ;= true
+    (println (paths/node-in? (:id john) path7))
+    ;= false
+    (println (paths/node-in? (:id bern) path7))
+    ;= true
+    (println (paths/node-in? john path7))
+    ;= false
+    (println (paths/node-in? bern path7))
+    ;= true
+    (println (paths/included-in? john path7))
+    ;= true
+    (println (paths/included-in? rel1 path7))
+    ;= true
+    (println (paths/relationship-in? (:id rel1) path7))
+    ;= true
+    (println (paths/relationship-in? rel1 path7))
+    ;= false
+    (println (paths/included-in? rel4 path7))
+    ;= false
+    (println (paths/relationship-in? (:id rel4) path7))
+    ;= false
+    (println (paths/relationship-in? rel4 path7))
+    ;= true
+    (println (paths/exprintlnts-between? (:id john) (:id liz) :relationships [rt] :max-depth 7))
+    ;= false
+    (println (paths/exprintlnts-between? (:id beth) (:id bern) :relationships [rt] :max-depth 7))
+    ;= nil
+    (println path9)))
+```
 
 In cases when there are multiple paths of equal length, `clojurewerkz.neocons.rest.paths/shortest-between` will return just one and `clojurewerkz.neocons.rest.paths/all-shortest-between` will return all of them.
 
@@ -123,7 +298,24 @@ Another common operation is checking whether a path between two nodes exists at 
 
 `clojurewerkz.neocons.rest.paths/exists-between?` checks whether there is a path from node A to node B:
 
-{% gist 13d2b968f5973c429a04 %}
+``` clojure
+(ns neocons.docs.examples
+  (:require [clojurewerkz.neocons.rest :as nr]
+            [clojurewerkz.neocons.rest.nodes :as nn]
+            [clojurewerkz.neocons.rest.relationships :as nrl]
+            [clojurewerkz.neocons.rest.paths :as np]))
+
+(defn -main
+  [& args]
+  (nr/connect! "http://localhost:7474/db/data/")
+  (let [john (nodes/create {:name "John"})
+        beth (nodes/create {:name "Elizabeth"})
+        gael (nodes/create {:name "Gaël"})
+        _    (relationships/create john beth :knows)
+        _    (relationships/create beth gael :knows)
+        rt   {:type "knows" :direction "out"}]
+    (println (np/exists-between? (:id john) (:id gael) :relationships [rt] :max-depth 3))))
+```
 
 Relationship types that can be used (followed) during traversal are given via the `:relationships` option.
 
@@ -142,6 +334,10 @@ We recommend that you read the following guides first, if possible, in this orde
 
 ## Tell Us What You Think!
 
-Please take a moment to tell us what you think about this guide on Twitter or the [Neocons mailing list](https://groups.google.com/forum/#!forum/clojure-neo4j)
+Please take a moment to tell us what you think about this guide on
+Twitter or the [Neocons mailing
+list](https://groups.google.com/forum/#!forum/clojure-neo4j)
 
-Let us know what was unclear or what has not been covered. Maybe you do not like the guide style or grammar or discover spelling mistakes. Reader feedback is key to making the documentation better.
+Let us know what was unclear or what has not been covered. Maybe you
+do not like the guide style or grammar or discover spelling
+mistakes. Reader feedback is key to making the documentation better.
