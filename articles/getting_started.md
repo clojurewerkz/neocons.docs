@@ -209,8 +209,7 @@ Relationships can have properties, just like nodes:
   (let [amy (nn/create {:username "amy"})
         bob (nn/create {:username "bob"})
         rel (nrl/create amy bob :friend {:source "college"})]
-    (println (nn/get (:id amy)))
-    (println (nn/get (:id bob)))))
+    (println rel)))
 ```
 
 ### Relationships are just Clojure maps
@@ -241,17 +240,13 @@ a node by id with `clojurewerkz.neocons.rest.nodes/get`:
 ``` clojure
 (ns neocons.docs.examples
   (:require [clojurewerkz.neocons.rest :as nr]
-            [clojurewerkz.neocons.rest.nodes :as nn]
-            [clojurewerkz.neocons.rest.relationships :as nrl]))
+            [clojurewerkz.neocons.rest.nodes :as nn]))
 
 (defn -main
   [& args]
   (nr/connect! "http://localhost:7474/db/data/")
-  (let [amy (nn/create {:username "amy"})
-        bob (nn/create {:username "bob"})
-        rel (nrl/create amy bob :friend {:source "college"})]
-    (println (nn/get (:id amy)))
-    (println (nn/get (:id bob)))))
+  (let [amy (nn/create {:username "amy"})]
+    (println (nn/get (:id amy)))))
 ```
 
 It returns a node value that is a Clojure map.
@@ -299,17 +294,15 @@ in detail the [Traversing the graph](/articles/traversing.html) guide. `clojurew
 (ns neocons.docs.examples
   (:require [clojurewerkz.neocons.rest :as nr]
             [clojurewerkz.neocons.rest.nodes :as nn]
-            [clojurewerkz.neocons.rest.relationships :as nrl]
-            [clojurewerkz.neocons.rest.cypher :as cy]))
+            [clojurewerkz.neocons.rest.relationships :as nrl]))
 
 (defn -main
   [& args]
   (nr/connect! "http://localhost:7474/db/data/")
-  (let [amy (nn/create {:username "amy" :age 27})
-        bob (nn/create {:username "bob" :age 28})
-        _   (nrl/create amy bob :friend {:source "college"})
-        res (cy/tquery "START x = node({ids}) RETURN x.username, x.age" {:ids (map :id [amy bob])})]
-    (println res)))
+  (let [amy (nn/create {:username "amy"})
+        bob (nn/create {:username "bob"})
+        _   (nrl/create amy bob :friend {:source "college"})]
+    (println (nrl/incoming-for bob :types [:friend]))))
 ```
 
 Both accept a node and a collection of relationship types you are interested in as the `:types` option, returning a collection
@@ -417,7 +410,7 @@ a node to start traversing from, relationships to follow and additional options 
         pete (nn/create {:name "Peter"})
         _    (nrl/create john adam :friend)
         _    (nrl/create adam pete :friend)]
-    (println (nn/traverse (:id john) :relationships [{:direction "out" :type "friend"}] :return-filter {:language "builtin" :name "all_but_start_node"})))
+    (println (nn/traverse (:id john) :relationships [{:direction "out" :type "friend"}] :return-filter {:language "builtin" :name "all_but_start_node"}))))
 ```
 
 
@@ -440,7 +433,7 @@ counterpart that traverses nodes:
         pete (nn/create {:name "Peter"})
         _    (nrl/create john adam :friend)
         _    (nrl/create adam pete :friend)]
-    (println (nrl/traverse (:id john) :relationships [{:direction "out" :type "friend"}])))
+    (println (nrl/traverse (:id john) :relationships [{:direction "out" :type "friend"}]))))
 ```
 
 
