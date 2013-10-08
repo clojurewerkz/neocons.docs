@@ -13,7 +13,7 @@ layout: article
  * Deleting nodes
  * Deleting relationships
  * Performing batch operations via Neo4J REST API
-
+ * Performing operations in a transaction
 
 This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by/3.0/">Creative Commons Attribution 3.0 Unported License</a> (including images & stylesheets). The source is available [on Github](https://github.com/clojurewerkz/neocons.docs).
 
@@ -607,6 +607,89 @@ operations per request). To use it, you pass a collection of maps to `clojurewer
     (println res)))
 ```
 
+## Performing operations in a transaction
+Neocons 2.0.0-beta2 and later support Neo4j's transaction HTTP endpoint
+concept. More documentation for it can be found [here](http://docs.neo4j.org/chunked/milestone/rest-api-transactional.html). This API only accepts a series of Cypher statements and can not be used along side the other REST APIs.
+
+To create a cypher statement, you can use the `clojurewerkz.neocons.rest.transaction/statement` method which takes a cypher query string and an optional map of parameters.
+
+``` clojure
+(ns neocons.docs.examples
+  (:require [clojurewerkz.neocons.rest :as nr]
+            [clojurewerkz.neocons.rest.transaction :as tx]))
+
+(defn -main
+  [& args]
+  (nr/connect! "http://localhost:7474/db/data/")
+  (let [a (tx/statement "CREATE (n {props}) RETURN n" {:props {:name "Node 1"}})
+        b (tx/statement "CREATE (n) RETURN n")]
+    (println a)
+    (println b)))
+```
+
+To execute a series of statements and commit them in a single transaction with rollback
+on any cypher error, use the `clojurewerkz.neocons.rest.transaction/in-transaction` method.
+
+``` clojure
+(ns neocons.docs.examples
+  (:require [clojurewerkz.neocons.rest :as nr]
+            [clojurewerkz.neocons.rest.transaction :as tx]))
+
+(defn -main
+  [& args]
+  (nr/connect! "http://localhost:7474/db/data/")
+  (tx/in-transaction
+    (tx/statement "CREATE (n {props}) RETURN n" {:props {:name "Node 1"}})
+    (tx/statement "CREATE (n {props}) RETURN n" {:props {:name "Node 2"}})))
+```
+
+
+### Low level transaction API
+
+For more complex operations, you can directly use the lower level REST API
+for transactions.
+
+``` clojure
+(ns neocons.docs.examples
+  (:require [clojurewerkz.neocons.rest :as nr]
+            [clojurewerkz.neocons.rest.transaction :as tx]))
+
+(defn -main
+  [& args]
+  (nr/connect! "http://localhost:7474/db/data/")
+  (let [transaction (tx/begin-tx)
+       [_ result] (tx/execute transaction [(tx/statement "CREATE (n) RETURN ID(n)")])]
+       (println result)
+       (tx/commit transaction)))
+```
+
+Similarly you can use the `clojurewerkz.neocons.rest.transaction/rollback` method instead of
+`clojurewerkz.neocons.rest.transaction/commit` to rollback the existing transaction.
+
+For encapulating the commit-on-success and rollback-on-error pattern, you can use the
+`clojurewerkz.neocons.rest.transaction/with-transaction` macro which has
+parameters: `transaction`, `commit-on-success?` and a `body`. If `commit-on-success?`
+is `false` then the user will have to manually commit the transaction. This can be
+useful if you wanted to test changes made by cypger statement without actually committing
+them to the database. If there are any errors in the body or any cypher errors in
+any statement sent the server, the transaction will automatically be rolled back.
+
+``` clojure
+(ns neocons.docs.examples
+  (:require [clojurewerkz.neocons.rest :as nr]
+            [clojurewerkz.neocons.rest.transaction :as tx]))
+
+(defn -main
+  [& args]
+  (nr/connect! "http://localhost:7474/db/data/")
+  (let [transaction (tx/begin-tx)]
+    (tx/with-transaction
+      transaction
+      true
+      (let [[_ result] (tx/execute transaction [(tx/statement "CREATE (n) RETURN ID(n)")])]
+        (println result)))))
+
+```
 
 ## What to read next
 
