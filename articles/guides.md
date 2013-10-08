@@ -26,7 +26,7 @@ This guide covers:
  * Indexing of relationships
  * Deleting nodes
  * Deleting relationships
-
+ * Using Neo4j REST transaction API
 
 ### [Traversing the graph](/articles/traversing.html)
 
