@@ -15,7 +15,7 @@ This work is licensed under a <a rel="license" href="http://creativecommons.org/
 
 ## What version of Neocons does this guide cover?
 
-This guide covers Neocons 1.1.x.
+This guide covers Neocons 2.0 (including preview releases).
 
 
 ## Overview
