@@ -19,7 +19,7 @@ This work is licensed under a <a rel="license" href="http://creativecommons.org/
 
 ## What version of Neocons does this guide cover?
 
-This guide covers Neocons 1.1.x.
+This guide covers Neocons 2.0 (including preview releases).
 
 
 ## Neocons Overview
@@ -40,14 +40,16 @@ in the future versions. Neocons may or may not be Web Scale and puts correctness
 
 ## Supported Clojure versions
 
-Neocons is built from the ground up for Clojure 1.3 and later.
+Neocons 2.0 requires Clojure 1.4+.
 
 
-## Supported Neo4J Server versions
+## Supported Neo4J Server Versions
 
-Neocons supports Neo4J Server 1.6.0 and later but some features (in particular, in the Cypher language) may be specific to more recent versions.
-The most recent Neo4J Server is thus recommended. We continuously test Neocons against bleeding edge server features and milestone releases,
-so upgrade path should be smooth in most cases.
+Neocons 2.0+ targets Neo4J Server 2.0.
+
+Most features would work with Neo4J Server 1.6.0 but some features
+(including the Cypher language) may be specific to more recent
+versions. The most recent Neo4J Server is thus recommended.
 
 
 ## Adding Neocons Dependency To Your Project
@@ -55,7 +57,7 @@ so upgrade path should be smooth in most cases.
 ### With Leiningen
 
 ``` clojure
-[clojurewerkz/neocons "1.1.0"]
+[clojurewerkz/neocons "2.0.0-beta3"]
 ```
 
 ### With Maven
@@ -75,7 +77,7 @@ And then the dependency:
 <dependency>
   <groupId>clojurewerkz</groupId>
   <artifactId>neocons</artifactId>
-  <version>1.1.0</version>
+  <version>2.0.0-beta3</version>
 </dependency>
 ```
 
