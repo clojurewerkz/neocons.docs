@@ -8,12 +8,14 @@ layout: article
  * Creating nodes
  * Connecting nodes by creating relationships
  * Node and relationship attributes
- * Indexing of nodes
- * Indexing of relationships
+ * Indexing of nodes (Legacy)
+ * Indexing of relationships (Legacy)
  * Deleting nodes
  * Deleting relationships
  * Performing batch operations via Neo4J REST API
  * Performing operations in a transaction
+ * Node Labels
+ * Schema
 
 This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by/3.0/">Creative Commons Attribution 3.0 Unported License</a> (including images & stylesheets). The source is available [on Github](https://github.com/clojurewerkz/neocons.docs).
 
@@ -574,7 +576,7 @@ just does nothing. Unlike nodes, relationships can be deleted without any restri
 
 ## Performing batch operations via Neo4J REST API
 
-Neocons 1.0.0-rc3 and later supports batch operations via Neo4J REST API. The API is fairly low level but is very efficient (can handle millions of
+Neocons 2.0.0-rc3 and later support batch operations via Neo4J REST API. The API is fairly low level but is very efficient (can handle millions of
 operations per request). To use it, you pass a collection of maps to `clojurewerkz.neocons.rest.batch/perform`:
 
 ``` clojure
@@ -688,6 +690,115 @@ any statement sent the server, the transaction will automatically be rolled back
       true
       (let [[_ result] (tx/execute transaction [(tx/statement "CREATE (n) RETURN ID(n)")])]
         (println result)))))
+
+```
+
+## Node Labels
+
+Neo4j 2.0 added the concept of [Labels](http://docs.neo4j.org/chunked/milestone/graphdb-neo4j-labels.html) and `clojurewerkz.neocons.rest.labels` implements that functionality. More information about Neo4j labels can be found [here](http://docs.neo4j.org/chunked/milestone/rest-api-node-labels.html).
+
+An example which shows the basic functionality is listed below.
+
+``` clojure
+(ns neocons.docs.examples
+  (:require [clojurewerkz.neocons.rest :as nr]
+            [clojurewerkz.neocons.rest.nodes :as nn]
+            [clojurewerkz.neocons.rest.labels :as nl]))
+
+(defn -main
+  [& args]
+  (nr/connect! "http://localhost:7474/db/data/")
+  ; create a node
+  (let [node (nn/create {:name "Clint Eastwood"})]
+    ; Add a single label to the node
+    (nl/add node "Person")
+    ; or, add multiple labels to the node
+    (nl/add node ["Person" "Actor"])
+
+    ; replace the current labels with new ones
+    (nl/replace node ["Actor" "Director"])
+
+    ; remove a particular label
+    (nl/remove node "Person")
+
+    ; listing all labels for a node
+    (println (nl/get-all-labels node))
+
+    ; list all labels for the whole graph db
+    (println (nl/get-all-labels))
+
+    ; getting all nodes with a label
+    (println (nl/get-all-nodes "Actor"))
+
+    ; get nodes by label and property
+    (println (nl/get-all-nodes "Person" :name "Client Eastwood"))))
+
+```
+
+## Schema
+Since Neo4j 2.0, you can add schema meta information for speed improvements
+or modelling benefits. They fall into two categories, Indices and Constraints.
+These features are very new and subject to change.
+
+### Indexing
+To find out more about Indexing, see the Neo4j documentation [here](http://docs.neo4j.org/chunked/milestone/rest-api-schema-indexes.html).
+
+An example which shows the basic functionality is listed below.
+
+``` clojure
+(ns neocons.docs.examples
+  (:require [clojurewerkz.neocons.rest :as nr]
+            [clojurewerkz.neocons.rest.index :as ni]))
+
+(defn -main
+  [& args]
+  (nr/connect! "http://localhost:7474/db/data/")
+  (do
+    ; create an index on a label and a property name
+    (ni/create "Person" :name)
+
+    ; get all indices on a label
+    (println (ni/get-all "Person"))
+
+    ; drop an index on a label and a property name
+    (ni/drop "Person" :name)))
+
+```
+
+### Constraints
+
+To find out more about Constraints, see the Neo4j documentation [here](http://docs.neo4j.org/chunked/milestone/rest-api-schema-constraints.html).
+
+An example which shows the basic functionality is listed below.
+
+``` clojure
+
+(ns neocons.docs.examples
+  (:require [clojurewerkz.neocons.rest :as nr]
+            [clojurewerkz.neocons.rest.constraints :as nc]))
+
+(defn -main
+  [& args]
+  (nr/connect! "http://localhost:7474/db/data/")
+
+  (do
+    ; create an uniqueness constraint on a label and a property name
+    (nc/create-unique "Person" :name)
+
+    ; get an existing uniquness constraint on a label and a property name
+    (println (nc/get-unique "Person" :name))
+
+    ; get all existing uniquness constraints on a label
+    (println (nc/get-unique "Person"))
+
+    ; get all existing constraints on a label
+    (println (nc/get-all "Person"))
+
+    ; get all existing constraints for the whole graph db
+    (println (nc/get-all))
+
+    ; drop an existing uniqueness constraint on a label and a property name
+    (nc/drop "Person" :name)))
 
 ```
 
