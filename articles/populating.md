@@ -17,7 +17,11 @@ layout: article
  * Node Labels
  * Schema
 
-This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by/3.0/">Creative Commons Attribution 3.0 Unported License</a> (including images & stylesheets). The source is available [on Github](https://github.com/clojurewerkz/neocons.docs).
+This work is licensed under a <a rel="license"
+href="http://creativecommons.org/licenses/by/3.0/">Creative Commons
+Attribution 3.0 Unported License</a> (including images &
+stylesheets). The source is available [on
+Github](https://github.com/clojurewerkz/neocons.docs).
 
 
 ## What version of Neocons does this guide cover?
@@ -43,7 +47,8 @@ Nodes are created using the `clojurewerkz.neocons.rest.nodes/create` function:
     (println node)))
 ```
 
-Nodes typically have properties. They are passed to `clojurewerkz.neocons.rest.nodes/create` as maps:
+Nodes typically have properties. They are passed to
+`clojurewerkz.neocons.rest.nodes/create` as maps:
 
 ``` clojure
 (ns neocons.docs.examples
@@ -60,8 +65,9 @@ Nodes typically have properties. They are passed to `clojurewerkz.neocons.rest.n
 
 ### Efficiently creating a large number of nodes
 
-It is possible to efficiently insert a large number of nodes (up to hundreds of thousands of millions) in a single request using
-the `clojurewerkz.neocons.rest.nodes/create-batch` function:
+It is possible to efficiently insert a large number of nodes (up to
+hundreds of thousands of millions) in a single request using the
+`clojurewerkz.neocons.rest.nodes/create-batch` function:
 
 ``` clojure
 (ns neocons.docs.examples
@@ -87,18 +93,23 @@ It returns a lazy sequence of results, so if you want to retrieve them all at on
 
 ### Nodes are just Clojure maps
 
-The function returns a new node which is a Clojure record but for all intents and purposes should be treated and handled
-as a map. In Neo4J, nodes have identifiers so `:id` key for created and fetched nodes is always set. Node identifiers
-are used by various Neocons API functions.
+The function returns a new node which is a Clojure record but for all
+intents and purposes should be treated and handled as a map. In Neo4J,
+nodes have identifiers so `:id` key for created and fetched nodes is
+always set. Node identifiers are used by various Neocons API
+functions.
 
-Fetched nodes also have the `:location-uri` and `:data` fields. `:location-uri` returns a URI from which a node can be fetched
-again with a GET request. Location URI is typically not used by applications. `:data`, however, contains node properties
-and is very commonly used.
+Fetched nodes also have the `:location-uri` and `:data`
+fields. `:location-uri` returns a URI from which a node can be fetched
+again with a GET request. Location URI is typically not used by
+applications. `:data`, however, contains node properties and is very
+commonly used.
 
 
 ## Creating relationships
 
-Now that we know how to create nodes, lets create two nodes representing two Web pages that link to each other and add a directed
+Now that we know how to create nodes, lets create two nodes
+representing two Web pages that link to each other and add a directed
 relationship between them:
 
 ``` clojure
@@ -137,7 +148,8 @@ Relationships can have properties, just like nodes:
 
 ### Relationships are just Clojure maps
 
-Similarly to nodes, relationships are technically records with a few mandatory attributes:
+Similarly to nodes, relationships are technically records with a few
+mandatory attributes:
 
  * `:id`
  * `:start`
@@ -146,25 +158,35 @@ Similarly to nodes, relationships are technically records with a few mandatory a
  * `:data`
  * `:location-uri`
 
-`:id`, `:data` and `:location-uri` serve the same purpose as with nodes. `:start` and `:end` return location URIs of nodes on both
-ends of a relationship. `:type` returns relationship type (like "links" or "friend" or "connected-to").
+`:id`, `:data` and `:location-uri` serve the same purpose as with
+nodes. `:start` and `:end` return location URIs of nodes on both ends
+of a relationship. `:type` returns relationship type (like "links" or
+"friend" or "connected-to").
 
 Just like nodes, created relationships have `:id` set on them.
 
-`clojurewerkz.neocons.rest.relationships/create-many` is a function that lets you creates multiple relationships for a node,
-all with the same direction and type. It is covered in the [Populating the graph guide](/articles/populating.html).
+`clojurewerkz.neocons.rest.relationships/create-many` is a function
+that lets you creates multiple relationships for a node, all with the
+same direction and type. It is covered in the [Populating the graph
+guide](/articles/populating.html).
 
 
 ## Node and relationship attributes
 
-Nodes and relationships in Neo4J have properties (attributes). It is possible for a node or relationship to not have any properties. The semantics of properties
-varies from application to application. For example, in a social application nodes that represent people may have `:name` and `:date-of-birth` properties,
-while relationships may have `:created_at` properties that store a moment in time when two people have met.
+Nodes and relationships in Neo4J have properties (attributes). It is
+possible for a node or relationship to not have any properties. The
+semantics of properties varies from application to application. For
+example, in a social application nodes that represent people may have
+`:name` and `:date-of-birth` properties, while relationships may have
+`:created_at` properties that store a moment in time when two people
+have met.
 
 ### Node properties
 
-Nodes properties are passed to the `clojurewerkz.neocons.rest.nodes/create` function when a ndoe is created. In the following example, a node is created with
-two properties, `:url` and `:domain`:
+Nodes properties are passed to the
+`clojurewerkz.neocons.rest.nodes/create` function when a ndoe is
+created. In the following example, a node is created with two
+properties, `:url` and `:domain`:
 
 ``` clojure
 (ns neocons.docs.examples
@@ -182,7 +204,9 @@ two properties, `:url` and `:domain`:
 
 ### Updating node properties
 
-Node properties can be updated using `clojurewerkz.neocons.rest.nodes/update` that takes a node or node id and a map of properties:
+Node properties can be updated using
+`clojurewerkz.neocons.rest.nodes/update` that takes a node or node id
+and a map of properties:
 
 ``` clojure
 (ns neocons.docs.examples
@@ -199,7 +223,8 @@ Node properties can be updated using `clojurewerkz.neocons.rest.nodes/update` th
     (println "After the update: " node)))
 ```
 
-It is also possible to set a single property with `clojurewerkz.neocons.rest.nodes/set-property`:
+It is also possible to set a single property with
+`clojurewerkz.neocons.rest.nodes/set-property`:
 
 ``` clojure
 (ns neocons.docs.examples
@@ -219,8 +244,11 @@ It is also possible to set a single property with `clojurewerkz.neocons.rest.nod
 
 ### Relationship properties
 
-Relationship properties are very similar to node properties. They are passed to the `clojurewerkz.neocons.rest.relationship/create` function when a relationship is created.
-In the following example, a relationship between two nodes is created with two properties, `:link-text` and `:created-at`:
+Relationship properties are very similar to node properties. They are
+passed to the `clojurewerkz.neocons.rest.relationship/create` function
+when a relationship is created.  In the following example, a
+relationship between two nodes is created with two properties,
+`:link-text` and `:created-at`:
 
 ``` clojure
 (ns neocons.docs.examples
@@ -241,7 +269,9 @@ In the following example, a relationship between two nodes is created with two p
 
 ### Updating relationship properties
 
-Relationships properties can be updated using `clojurewerkz.neocons.rest.relationships/update` that takes a node or node id and a map of properties:
+Relationships properties can be updated using
+`clojurewerkz.neocons.rest.relationships/update` that takes a node or
+node id and a map of properties:
 
 ``` clojure
 (ns neocons.docs.examples
@@ -284,18 +314,30 @@ It is also possible to set a single property with `clojurewerkz.neocons.rest.nod
 
 ## Indexes
 
-Indexes are data structures that data stores maintain to make certain queries significantly faster. Nodes and relationships in Neo4J are typically retrieved by
-id but this is not always convenient. Often what's needed is a way to efficiently retrieve a node by email or URL or other attribute other than `:id`. Indexes
-make that possible. In this sense Neo4J is not very different from other databases.
+Indexes are data structures that data stores maintain to make certain
+queries significantly faster. Nodes and relationships in Neo4J are
+typically retrieved by id but this is not always convenient. Often
+what's needed is a way to efficiently retrieve a node by email or URL
+or other attribute other than `:id`. Indexes make that possible. In
+this sense Neo4J is not very different from other databases.
 
-You can index nodes and relationships and have as many indexes as you need (within the limit of Neo4J server disk and RAM resources).
+You can index nodes and relationships and have as many indexes as you
+need (within the limit of Neo4J server disk and RAM resources).
 
 ### Indexing of nodes
 
-Before nodes can be indexed, an index needs to be created. Neo4J has a feature called [automatic indexes](http://docs.neo4j.org/chunked/milestone/rest-api-auto-indexes.html) but it may be disabled via server configuration, so typically it is a good idea to just create an index and use it.
+Before nodes can be indexed, an index needs to be created. Neo4J has a
+feature called [automatic
+indexes](http://docs.neo4j.org/chunked/milestone/rest-api-auto-indexes.html)
+but it may be disabled via server configuration, so typically it is a
+good idea to just create an index and use it.
 
-`clojurewerkz.neocons.rest.nodes/create-index` is the function to use to create a new index for nodes. Indexes can be created with a specific *configuration*: it determines
-whether it is a regular or full text search index and allows for specifying [additional index parameters](http://docs.neo4j.org/chunked/milestone/indexing-create-advanced.html) (like analyzer for full text search indexes).
+`clojurewerkz.neocons.rest.nodes/create-index` is the function to use
+to create a new index for nodes. Indexes can be created with a
+specific *configuration*: it determines whether it is a regular or
+full text search index and allows for specifying [additional index
+parameters](http://docs.neo4j.org/chunked/milestone/indexing-create-advanced.html)
+(like analyzer for full text search indexes).
 
 ``` clojure
 (ns neocons.docs.examples
@@ -322,7 +364,9 @@ whether it is a regular or full text search index and allows for specifying [add
     (println idx)))
 ```
 
-To add a node to an index, use `clojurewerkz.neocons.rest.nodes/add-to-index`. To remove a node from an index, use `clojurewerkz.neocons.rest.nodes/delete-from-index`.
+To add a node to an index, use
+`clojurewerkz.neocons.rest.nodes/add-to-index`. To remove a node from
+an index, use `clojurewerkz.neocons.rest.nodes/delete-from-index`.
 
 ``` clojure
 (ns neocons.docs.examples
@@ -337,7 +381,10 @@ To add a node to an index, use `clojurewerkz.neocons.rest.nodes/add-to-index`. T
     (nn/add-to-index (:id node) (:name idx) "username" "joe")))
 ```
 
-To add a node to an index [as unique](http://docs.neo4j.org/chunked/stable/rest-api-unique-indexes.html), pass one more argument to `clojurewerkz.neocons.rest.nodes/add-to-index`:
+To add a node to an index [as
+unique](http://docs.neo4j.org/chunked/stable/rest-api-unique-indexes.html),
+pass one more argument to
+`clojurewerkz.neocons.rest.nodes/add-to-index`:
 
 ``` clojure
 (ns neocons.docs.examples
@@ -374,8 +421,11 @@ To look a node up in an exact match (not full text search) index, use `clojurewe
     (println (nn/query (:name idx) "country:Germany"))))
 ```
 
-It returns a (possibly empty) collection of nodes found. There is also a similar function, `clojurewerkz.neocons.rest.nodes/find-one`, that works just like `find`
-but assumes there only ever going to be a single node with the given key in the index, so it can be returned instead of a collection with the only value.
+It returns a (possibly empty) collection of nodes found. There is also
+a similar function, `clojurewerkz.neocons.rest.nodes/find-one`, that
+works just like `find` but assumes there only ever going to be a
+single node with the given key in the index, so it can be returned
+instead of a collection with the only value.
 
 With full text search indexes, the function to use is `clojurewerkz.neocons.rest.nodes/query`:
 
@@ -400,9 +450,11 @@ With full text search indexes, the function to use is `clojurewerkz.neocons.rest
 
 ### Indexing of relationships
 
-Similarly to node indexes, relationship indexes typically need to be created before they are used.
-`clojurewerkz.neocons.rest.nodes/create-index` is the function to use to create a new relationship index. Just like node Indexes, relationship ones can be created with
-a specific configuration.
+Similarly to node indexes, relationship indexes typically need to be
+created before they are used.
+`clojurewerkz.neocons.rest.nodes/create-index` is the function to use
+to create a new relationship index. Just like node Indexes,
+relationship ones can be created with a specific configuration.
 
 ``` clojure
 (ns neocons.docs.examples
@@ -433,7 +485,10 @@ a specific configuration.
     (println idx)))
 ```
 
-To add a relationship to an index, use `clojurewerkz.neocons.rest.relationships/add-to-index`. To remove a relationship from an index, use `clojurewerkz.neocons.rest.relationships/delete-from-index`.
+To add a relationship to an index, use
+`clojurewerkz.neocons.rest.relationships/add-to-index`. To remove a
+relationship from an index, use
+`clojurewerkz.neocons.rest.relationships/delete-from-index`.
 
 ``` clojure
 (ns neocons.docs.examples
@@ -452,7 +507,10 @@ To add a relationship to an index, use `clojurewerkz.neocons.rest.relationships/
     (println rel)))
 ```
 
-To add a relationship to an index [as unique](http://docs.neo4j.org/chunked/stable/rest-api-unique-indexes.html), pass one more argument to `clojurewerkz.neocons.rest.relationships/add-to-index`:
+To add a relationship to an index [as
+unique](http://docs.neo4j.org/chunked/stable/rest-api-unique-indexes.html),
+pass one more argument to
+`clojurewerkz.neocons.rest.relationships/add-to-index`:
 
 ``` clojure
 (ns neocons.docs.examples
@@ -471,7 +529,8 @@ To add a relationship to an index [as unique](http://docs.neo4j.org/chunked/stab
     (println rel)))
 ```
 
-To look a relationship up in an exact match (not full text search) index, use `clojurewerkz.neocons.rest.relationships/find`:
+To look a relationship up in an exact match (not full text search)
+index, use `clojurewerkz.neocons.rest.relationships/find`:
 
 ``` clojure
 (ns neocons.docs.examples
@@ -490,11 +549,14 @@ To look a relationship up in an exact match (not full text search) index, use `c
     (println (nrel/find (:name idx) :link-text "Neocons"))))
 ```
 
-There is also a similar function, `clojurewerkz.neocons.rest.relationships/find-one`, that works just like `find` but assumes there
-only ever going to be a single relationship with the given key in the index, so it can be returned instead of a collection with the only
-value.
+There is also a similar function,
+`clojurewerkz.neocons.rest.relationships/find-one`, that works just
+like `find` but assumes there only ever going to be a single
+relationship with the given key in the index, so it can be returned
+instead of a collection with the only value.
 
-With full text search indexes, the function to use is `clojurewerkz.neocons.rest.relationships/query`:
+With full text search indexes, the function to use is
+`clojurewerkz.neocons.rest.relationships/query`:
 
 ``` clojure
 (ns neocons.docs.examples
@@ -531,7 +593,8 @@ Nodes are deleted using the `clojurewerkz.neocons.rest.nodes/delete` function:
     (nn/delete (:id node)))
 ```
 
-Note, however, that a node only can be deleted if they have no relationships. To remove all node relationships and the node itself,
+Note, however, that a node only can be deleted if they have no
+relationships. To remove all node relationships and the node itself,
 use `clojurewerkz.neocons.rest.nodes/destroy`:
 
 ``` clojure
@@ -547,8 +610,9 @@ use `clojurewerkz.neocons.rest.nodes/destroy`:
     (nn/destroy node))
 ```
 
-`clojurewerkz.neocons.rest.nodes/delete-many` and `clojurewerkz.neocons.rest.nodes/destroy-many` are convenience functions that
-delete or destroy multiple nodes.
+`clojurewerkz.neocons.rest.nodes/delete-many` and
+`clojurewerkz.neocons.rest.nodes/destroy-many` are convenience
+functions that delete or destroy multiple nodes.
 
 
 ## Deleting relationships
@@ -570,14 +634,19 @@ Nodes are deleted using the `clojurewerkz.neocons.rest.relationships/delete` fun
     (nrel/delete rel)))
 ```
 
-`clojurewerkz.neocons.rest.relationships/maybe-delete` will delete a relationship by id but only if it exists. Otherwise it
-just does nothing. Unlike nodes, relationships can be deleted without any restrictions, so there is no `clojurewerkz.neocons.rest.relationships/destroy`.
+`clojurewerkz.neocons.rest.relationships/maybe-delete` will delete a
+relationship by id but only if it exists. Otherwise it just does
+nothing. Unlike nodes, relationships can be deleted without any
+restrictions, so there is no
+`clojurewerkz.neocons.rest.relationships/destroy`.
 
 
 ## Performing batch operations via Neo4J REST API
 
-Neocons supports batch operations via Neo4J REST API. The API is fairly low level but is very efficient (can handle millions of
-operations per request). To use it, you pass a collection of maps to `clojurewerkz.neocons.rest.batch/perform`:
+Neocons supports batch operations via Neo4J REST API. The API is
+fairly low level but is very efficient (can handle millions of
+operations per request). To use it, you pass a collection of maps to
+`clojurewerkz.neocons.rest.batch/perform`:
 
 ``` clojure
 (ns neocons.docs.examples
@@ -609,11 +678,16 @@ operations per request). To use it, you pass a collection of maps to `clojurewer
     (println res)))
 ```
 
-## Performing operations in a transaction
-Neocons 2.0.0-beta2 and later support Neo4j's transaction HTTP endpoint
-concept. More documentation for it can be found [here](http://docs.neo4j.org/chunked/milestone/rest-api-transactional.html). This API only accepts a series of Cypher statements and can not be used along side the other REST APIs.
+## Performing operations in a transaction Neocons 2.0.0-beta2 and
+later support Neo4j's transaction HTTP endpoint concept. More
+documentation for it can be found
+[here](http://docs.neo4j.org/chunked/milestone/rest-api-transactional.html). This
+API only accepts a series of Cypher statements and can not be used
+along side the other REST APIs.
 
-To create a cypher statement, you can use the `clojurewerkz.neocons.rest.transaction/statement` method which takes a cypher query string and an optional map of parameters.
+To create a cypher statement, you can use the
+`clojurewerkz.neocons.rest.transaction/statement` method which takes a
+cypher query string and an optional map of parameters.
 
 ``` clojure
 (ns neocons.docs.examples
@@ -629,8 +703,9 @@ To create a cypher statement, you can use the `clojurewerkz.neocons.rest.transac
     (println b)))
 ```
 
-To execute a series of statements and commit them in a single transaction with rollback
-on any cypher error, use the `clojurewerkz.neocons.rest.transaction/in-transaction` method.
+To execute a series of statements and commit them in a single
+transaction with rollback on any cypher error, use the
+`clojurewerkz.neocons.rest.transaction/in-transaction` method.
 
 ``` clojure
 (ns neocons.docs.examples
@@ -695,7 +770,11 @@ any statement sent the server, the transaction will automatically be rolled back
 
 ## Node Labels
 
-Neo4j 2.0 added the concept of [Labels](http://docs.neo4j.org/chunked/milestone/graphdb-neo4j-labels.html) and `clojurewerkz.neocons.rest.labels` implements that functionality. More information about Neo4j labels can be found [here](http://docs.neo4j.org/chunked/milestone/rest-api-node-labels.html).
+Neo4j 2.0 added the concept of
+[Labels](http://docs.neo4j.org/chunked/milestone/graphdb-neo4j-labels.html)
+and `clojurewerkz.neocons.rest.labels` implements that
+functionality. More information about Neo4j labels can be found
+[here](http://docs.neo4j.org/chunked/milestone/rest-api-node-labels.html).
 
 An example which shows the basic functionality is listed below.
 
@@ -741,7 +820,9 @@ or modelling benefits. They fall into two categories, Indices and Constraints.
 These features are very new and subject to change.
 
 ### Indexing
-To find out more about Indexing, see the Neo4j documentation [here](http://docs.neo4j.org/chunked/milestone/rest-api-schema-indexes.html).
+
+To find out more about Indexing, see the Neo4j documentation
+[here](http://docs.neo4j.org/chunked/milestone/rest-api-schema-indexes.html).
 
 An example which shows the basic functionality is listed below.
 
@@ -767,7 +848,8 @@ An example which shows the basic functionality is listed below.
 
 ### Constraints
 
-To find out more about Constraints, see the Neo4j documentation [here](http://docs.neo4j.org/chunked/milestone/rest-api-schema-constraints.html).
+To find out more about Constraints, see the Neo4j documentation
+[here](http://docs.neo4j.org/chunked/milestone/rest-api-schema-constraints.html).
 
 An example which shows the basic functionality is listed below.
 
