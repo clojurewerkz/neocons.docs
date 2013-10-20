@@ -814,10 +814,12 @@ An example which shows the basic functionality is listed below.
 
 ```
 
-## Schema
-Since Neo4j 2.0, you can add schema meta information for speed improvements
-or modelling benefits. They fall into two categories, Indices and Constraints.
-These features are very new and subject to change.
+## Schema & Constraints (Neo4J 2.0+)
+
+Since Neo4j 2.0, you can add schema meta information for speed
+improvements or modelling benefits. They fall into two categories,
+Indices and Constraints.  These features are very new and subject to
+change.
 
 ### Indexing
 
