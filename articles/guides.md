@@ -22,11 +22,14 @@ This guide covers:
  * Creating nodes
  * Connecting nodes by creating relationships
  * Node and relationship attributes
- * Indexing of nodes
- * Indexing of relationships
+ * Indexing of nodes (Legacy)
+ * Indexing of relationships (Legacy)
  * Deleting nodes
  * Deleting relationships
  * Using Neo4j REST transaction API
+ * Node Labels
+ * Schema
+
 
 ### [Traversing the graph](/articles/traversing.html)
 
