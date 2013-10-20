@@ -768,13 +768,13 @@ any statement sent the server, the transaction will automatically be rolled back
 
 ```
 
-## Node Labels
+## Node Labels (Neo4J 2.0+)
 
 Neo4j 2.0 added the concept of
 [Labels](http://docs.neo4j.org/chunked/milestone/graphdb-neo4j-labels.html)
-and `clojurewerkz.neocons.rest.labels` implements that
-functionality. More information about Neo4j labels can be found
-[here](http://docs.neo4j.org/chunked/milestone/rest-api-node-labels.html).
+and `clojurewerkz.neocons.rest.labels` implements that functionality
+[over HTTP
+API](http://docs.neo4j.org/chunked/milestone/rest-api-node-labels.html).
 
 An example which shows the basic functionality is listed below.
 
