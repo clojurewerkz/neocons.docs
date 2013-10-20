@@ -576,7 +576,7 @@ just does nothing. Unlike nodes, relationships can be deleted without any restri
 
 ## Performing batch operations via Neo4J REST API
 
-Neocons 2.0.0-rc3 and later support batch operations via Neo4J REST API. The API is fairly low level but is very efficient (can handle millions of
+Neocons supports batch operations via Neo4J REST API. The API is fairly low level but is very efficient (can handle millions of
 operations per request). To use it, you pass a collection of maps to `clojurewerkz.neocons.rest.batch/perform`:
 
 ``` clojure
