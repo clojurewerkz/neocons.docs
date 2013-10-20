@@ -678,10 +678,10 @@ operations per request). To use it, you pass a collection of maps to
     (println res)))
 ```
 
-## Performing operations in a transaction Neocons 2.0.0-beta2 and
-later support Neo4j's transaction HTTP endpoint concept. More
-documentation for it can be found
-[here](http://docs.neo4j.org/chunked/milestone/rest-api-transactional.html). This
+## Performing Operations in a Transaction (Neo4J 2.0+)
+
+Neocons 2.0 and later support Neo4j 2.0's [transactions over HTTP
+API](http://docs.neo4j.org/chunked/milestone/rest-api-transactional.html). This
 API only accepts a series of Cypher statements and can not be used
 along side the other REST APIs.
 
