@@ -882,7 +882,7 @@ An example which shows the basic functionality is listed below.
     (println (nc/get-all))
 
     ; drop an existing uniqueness constraint on a label and a property name
-    (nc/drop "Person" :name)))
+    (nc/drop-constraint "Person" :name)))
 
 ```
 
