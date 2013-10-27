@@ -253,6 +253,20 @@ a node by id with `clojurewerkz.neocons.rest.nodes/get`:
 
 It returns a node value that is a Clojure map.
 
+It's possible to fetch a node by id stored elsewhere:
+
+``` clojure
+(ns neocons.docs.examples
+  (:require [clojurewerkz.neocons.rest :as nr]
+            [clojurewerkz.neocons.rest.nodes :as nn]))
+
+(defn -main
+  [& args]
+  (nr/connect! "http://localhost:7474/db/data/")
+  ;; fetches a node with id 42
+  (println (nn/get 42)))
+```
+
 
 ## Fetching relationships
 
