@@ -216,8 +216,6 @@ An example that demonstrates several of those functions:
     ;= true    
     (println (empty? xs2))
     ;= nil    
-    (println path8)
-    ;= true
     (println (= 1 (count xs1)))
     ;= true    
     (println (= 2 (count xs3)))
