@@ -26,7 +26,7 @@ Github](https://github.com/clojurewerkz/neocons.docs).
 
 ## What version of Neocons does this guide cover?
 
-This guide covers Neocons 2.0 (including preview releases).
+This guide covers Neocons 2.0.
 
 
 
