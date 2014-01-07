@@ -668,8 +668,8 @@ operations per request). To use it, you pass a collection of maps to
               :body   {}
               :id     1}
              {:method "POST",
-              :to     "{0}/relationships",
-              :body   {:to   "{1}"
+              :to     "/node/0/relationships",
+              :body   {:to   1
                        :data {}
                        :type "knows"}
               :id     2}]
