@@ -57,7 +57,7 @@ versions. The most recent Neo4J Server is thus recommended.
 ### With Leiningen
 
 ``` clojure
-[clojurewerkz/neocons "2.0.0"]
+[clojurewerkz/neocons "2.0.1"]
 ```
 
 ### With Maven
@@ -77,7 +77,7 @@ And then the dependency:
 <dependency>
   <groupId>clojurewerkz</groupId>
   <artifactId>neocons</artifactId>
-  <version>2.0.0</version>
+  <version>2.0.1</version>
 </dependency>
 ```
 
