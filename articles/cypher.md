@@ -43,11 +43,11 @@ to find all Amy's friends via Cypher:
 
 (defn -main
   [& args]
-  (nr/connect! "http://localhost:7474/db/data/")
-  (let [amy (nn/create {:username "amy"})
-        bob (nn/create {:username "bob"})
-        _   (nrl/create amy bob :friend {:source "college"})
-        res (cy/tquery "START person=node({sid}) MATCH person-[:friend]->friend RETURN friend" {:sid (:id amy)})]
+  (let [conn  (nr/connect "http://localhost:7474/db/data/")
+        amy   (nn/create conn {:username "amy"})
+        bob   (nn/create conn {:username "bob"})
+        _     (nrl/create conn amy bob :friend {:source "college"})
+        res   (cy/tquery conn "START person=node({sid}) MATCH person-[:friend]->friend RETURN friend" {:sid (:id amy)})]
     (println res)))
 ```
 
@@ -62,11 +62,11 @@ And here is how to get back usernames and ages of multiple people using Cypher:
 
 (defn -main
   [& args]
-  (nr/connect! "http://localhost:7474/db/data/")
-  (let [amy (nn/create {:username "amy" :age 27})
-        bob (nn/create {:username "bob" :age 28})
-        _   (nrl/create amy bob :friend {:source "college"})
-        res (cy/tquery "START x = node({ids}) RETURN x.username, x.age" {:ids (map :id [amy bob])})]
+  (let [conn  (nr/connect "http://localhost:7474/db/data/")
+        amy   (nn/create conn {:username "amy" :age 27})
+        bob   (nn/create conn {:username "bob" :age 28})
+        _     (nrl/create conn amy bob :friend {:source "college"})
+        res   (cy/tquery conn "START x = node({ids}) RETURN x.username, x.age" {:ids (map :id [amy bob])})]
     (println res)))
 ```
 
