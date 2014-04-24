@@ -53,13 +53,14 @@ a node to start traversing from, relationships to follow and additional options 
 
 (defn -main
   [& args]
-  (nr/connect! "http://localhost:7474/db/data/")
-  (let [john (nn/create {:name "John"})
-        adam (nn/create {:name "Alan"})
-        pete (nn/create {:name "Peter"})
-        _    (nrl/create john adam :friend)
-        _    (nrl/create adam pete :friend)]
-    (println (nn/traverse (:id john) :relationships [{:direction "out" :type "friend"}] :return-filter {:language "builtin" :name "all_but_start_node"})))
+  (let [conn   (nr/connect "http://localhost:7474/db/data/")
+        john   (nn/create conn {:name "John"})
+        adam   (nn/create conn {:name "Alan"})
+        pete   (nn/create conn {:name "Peter"})
+        _      (nrl/create conn john adam :friend)
+        _      (nrl/create conn adam pete :friend)]
+    (println (nn/traverse conn (:id john) :relationships [{:direction "out" :type "friend"}]
+                          :return-filter {:language "builtin" :name "all_but_start_node"})))
 ```
 
 Accepted options are:
@@ -69,7 +70,7 @@ Accepted options are:
  * `:max-depth` (an integer, no default)
  * `:return-filter` (a map, default: `{:language "builtin" :name "all"}`): a map with a language the traversal is in (typically builtin) and the name of the filter (builtin filters: `"all"`, `"all_but_start_node"`). Defines a named filter for the traversal.
  * `:prune-evaluator` (a map, default: `{:language "builtin" :name "none"}`)
- * `:relationships` (a map, no default): a map with two mandatory keys, `:direction` and `:type` that specifies what relationships should be followed during the traversal. Example: `{:direction "all" :type "friend"}`. Direction can be one of: `"all"`, `"in"` or `"out"`. 
+ * `:relationships` (a map, no default): a map with two mandatory keys, `:direction` and `:type` that specifies what relationships should be followed during the traversal. Example: `{:direction "all" :type "friend"}`. Direction can be one of: `"all"`, `"in"` or `"out"`.
 
 For more information, see the [Neo4J REST API traversals guide](http://docs.neo4j.org/chunked/milestone/rest-api-traverse.html).
 
@@ -86,13 +87,13 @@ counterpart that traverses nodes:
 
 (defn -main
   [& args]
-  (nr/connect! "http://localhost:7474/db/data/")
-  (let [john (nn/create {:name "John"})
-        adam (nn/create {:name "Alan"})
-        pete (nn/create {:name "Peter"})
-        _    (nrl/create john adam :friend)
-        _    (nrl/create adam pete :friend)]
-    (println (nrl/traverse (:id john) :relationships [{:direction "out" :type "friend"}])))
+  (let [conn   (nr/connect "http://localhost:7474/db/data/")
+        john   (nn/create conn {:name "John"})
+        adam   (nn/create conn {:name "Alan"})
+        pete   (nn/create conn {:name "Peter"})
+        _      (nrl/create conn john adam :friend)
+        _      (nrl/create conn adam pete :friend)]
+    (println (nrl/traverse conn (:id john) :relationships [{:direction "out" :type "friend"}])))
 ```
 
 Accepted options are:
@@ -131,18 +132,19 @@ To perform a path traversal, use the `clojurewerkz.neocons.rest.paths/traverse` 
 (ns neocons.docs.examples
   (:require [clojurewerkz.neocons.rest :as nr]
             [clojurewerkz.neocons.rest.nodes :as nn]
-            [clojurewerkz.neocons.rest.relationships :as nrel]))
+            [clojurewerkz.neocons.rest.relationships :as nrel]
+            [clojurewerkz.neocons.rest.paths         :as paths]))
 
 (defn -main
   [& args]
-  (nr/connect! "http://localhost:7474/db/data/")
-  (let [john (nodes/create {:name "John"})
-        adam (nodes/create {:name "Alan"})
-        pete (nodes/create {:name "Peter"})
-        rel1 (relationships/create john adam :friend)
-        rel2 (relationships/create adam pete :friend)
-        xs1  (paths/traverse (:id john) :relationships [{:direction "all" :type "friend"}])
-        xs2  (paths/traverse (:id john) :relationships [{:direction "all" :type "enemy"}])]
+  (let [conn (nr/connect "http://localhost:7474/db/data/")
+        john (nn/create conn {:name "John"})
+        adam (nn/create conn {:name "Alan"})
+        pete (nn/create conn {:name "Peter"})
+        rel1 (nrel/create conn john adam :friend)
+        rel2 (nrel/create conn adam pete :friend)
+        xs1  (paths/traverse conn (:id john) :relationships [{:direction "all" :type "friend"}])
+        xs2  (paths/traverse conn (:id john) :relationships [{:direction "all" :type "enemy"}])]
     (println xs1)
     (println xs2)
     (let [path1 (first xs1)
@@ -179,110 +181,110 @@ An example that demonstrates several of those functions:
 (ns neocons.docs.examples
   (:require [clojurewerkz.neocons.rest :as nr]
             [clojurewerkz.neocons.rest.nodes :as nn]
-            [clojurewerkz.neocons.rest.relationships :as nrels]
+            [clojurewerkz.neocons.rest.relationships :as nrel]
             [clojurewerkz.neocons.rest.paths         :as paths]))
 
 (defn -main
   [& args]
-  (nr/connect! "http://localhost:7474/db/data/")
   ;; a longer example that demonstrates several functions related to paths
-  (let [john (nodes/create {:name "John" :age 28 :location "New York City, NY"})
-        liz  (nodes/create {:name "Liz"  :age 27 :location "Buffalo, NY"})
-        beth (nodes/create {:name "Elizabeth" :age 30 :location "Chicago, IL"})
-        bern (nodes/create {:name "Bernard"   :age 33 :location "Zürich"})
-        gael (nodes/create {:name "Gaël"      :age 31 :location "Montpellier"})
-        alex (nodes/create {:name "Alex"      :age 24 :location "Toronto, ON"})
-        rel1 (nrel/create john liz  :knows)
-        rel2 (nrel/create liz  beth :knows)
-        rel3 (nrel/create liz  bern :knows)
-        rel4 (nrel/create bern gael :knows)
-        rel5 (nrel/create gael beth :knows)
-        rel6 (nrel/create beth gael :knows)
-        rel7 (nrel/create john gael :knows)
-        rt   {:type "knows" :direction "out"}
-        xs1   (paths/all-shortest-between (:id john) (:id liz)  :relationships [rt] :max-depth 1)
+  (let [conn  (nr/connect "http://localhost:7474/db/data/")
+        john  (nn/create conn {:name "John" :age 28 :location "New York City, NY"})
+        liz   (nn/create conn {:name "Liz"  :age 27 :location "Buffalo, NY"})
+        beth  (nn/create conn {:name "Elizabeth" :age 30 :location "Chicago, IL"})
+        bern  (nn/create conn {:name "Bernard"   :age 33 :location "Zürich"})
+        gael  (nn/create conn {:name "Gaël"      :age 31 :location "Montpellier"})
+        alex  (nn/create conn {:name "Alex"      :age 24 :location "Toronto, ON"})
+        rel1  (nrel/create conn john liz  :knows)
+        rel2  (nrel/create conn liz  beth :knows)
+        rel3  (nrel/create conn liz  bern :knows)
+        rel4  (nrel/create conn bern gael :knows)
+        rel5  (nrel/create conn gael beth :knows)
+        rel6  (nrel/create conn beth gael :knows)
+        rel7  (nrel/create conn john gael :knows)
+        rt    {:type "knows" :direction "out"}
+        xs1   (paths/all-shortest-between conn (:id john) (:id liz)  :relationships [rt] :max-depth 1)
         path1 (first xs1)
-        xs2   (paths/all-shortest-between (:id john) (:id beth) :relationships [rt] :max-depth 1)
-        xs3   (paths/all-shortest-between (:id john) (:id beth) :relationships [rt] :max-depth 2)
+        xs2   (paths/all-shortest-between conn (:id john) (:id beth) :relationships [rt] :max-depth 1)
+        xs3   (paths/all-shortest-between conn (:id john) (:id beth) :relationships [rt] :max-depth 2)
         path3 (first xs3)
-        xs4   (paths/all-shortest-between (:id john) (:id beth) :relationships [rt] :max-depth 3)
+        xs4   (paths/all-shortest-between conn (:id john) (:id beth) :relationships [rt] :max-depth 3)
         path4 (first xs4)
-        xs5   (paths/all-shortest-between (:id john) (:id beth) :relationships [rt] :max-depth 7)
+        xs5   (paths/all-shortest-between conn (:id john) (:id beth) :relationships [rt] :max-depth 7)
         path5 (first xs5)
         path6 (last  xs5)
-        path7 (paths/shortest-between (:id john) (:id beth) :relationships [rt] :max-depth 7)
-        path8 (paths/shortest-between (:id john) (:id beth) :relationships [rt] :max-depth 1)
-        path9 (paths/shortest-between (:id john) (:id alex) :relationships [rt] :max-depth 1)]
-    ;= true    
+        path7 (paths/shortest-between conn (:id john) (:id beth) :relationships [rt] :max-depth 7)
+        path8 (paths/shortest-between conn (:id john) (:id beth) :relationships [rt] :max-depth 1)
+        path9 (paths/shortest-between conn (:id john) (:id alex) :relationships [rt] :max-depth 1)]
+    ;= true
     (println (empty? xs2))
-    ;= nil    
+    ;= nil
     (println (= 1 (count xs1)))
-    ;= true    
+    ;= true
     (println (= 2 (count xs3)))
-    ;= true    
+    ;= true
     (println (= 2 (count xs4)))
-    ;= true    
+    ;= true
     (println (= 2 (count xs5)))
-    ;= true    
+    ;= true
     (println (= (:start path1) (:location-uri john)))
-    ;= true    
+    ;= true
     (println (= (:end   path1) (:location-uri liz)))
-    ;= true    
+    ;= true
     (println (= 2 (:length path3)))
-    ;= true    
+    ;= true
     (println (= (:start path3) (:location-uri john)))
-    ;= true    
+    ;= true
     (println (= (:end   path3) (:location-uri beth)))
-    ;= true    
+    ;= true
     (println (= 2 (:length path4)))
-    ;= true    
+    ;= true
     (println (= (:start path4) (:location-uri john)))
-    ;= true    
+    ;= true
     (println (= (:end   path4) (:location-uri beth)))
-    ;= true    
+    ;= true
     (println (= 2 (:length path5)))
-    ;= true    
+    ;= true
     (println (= (:start path5) (:location-uri john)))
-    ;= true    
+    ;= true
     (println (= (:end   path5) (:location-uri beth)))
-    ;= true    
+    ;= true
     (println (= 2 (:length path6)))
-    ;= true    
+    ;= true
     (println (= (:start path6) (:location-uri john)))
-    ;= true    
+    ;= true
     (println (= (:end   path6) (:location-uri beth)))
-    ;= true    
+    ;= true
     (println (= 2 (:length path7)))
-    ;= true    
+    ;= true
     (println (= (:start path7) (:location-uri john)))
-    ;= true    
+    ;= true
     (println (= (:end   path7) (:location-uri beth)))
     ;= true
-    (println (paths/node-in? (:id john) path7))
+    (println (paths/node-in? conn (:id john) path7))
     ;= false
-    (println (paths/node-in? (:id bern) path7))
+    (println (paths/node-in? conn (:id bern) path7))
     ;= true
-    (println (paths/node-in? john path7))
+    (println (paths/node-in? conn john path7))
     ;= false
-    (println (paths/node-in? bern path7))
+    (println (paths/node-in? conn bern path7))
     ;= true
-    (println (paths/included-in? john path7))
+    (println (paths/included-in? conn john path7))
     ;= true
-    (println (paths/included-in? rel1 path7))
+    (println (paths/included-in? conn rel1 path7))
     ;= true
-    (println (paths/relationship-in? (:id rel1) path7))
+    (println (paths/relationship-in? conn (:id rel1) path7))
     ;= true
-    (println (paths/relationship-in? rel1 path7))
+    (println (paths/relationship-in? conn rel1 path7))
     ;= false
-    (println (paths/included-in? rel4 path7))
+    (println (paths/included-in? conn rel4 path7))
     ;= false
-    (println (paths/relationship-in? (:id rel4) path7))
+    (println (paths/relationship-in? conn (:id rel4) path7))
     ;= false
-    (println (paths/relationship-in? rel4 path7))
+    (println (paths/relationship-in? conn rel4 path7))
     ;= true
-    (println (paths/exprintlnts-between? (:id john) (:id liz) :relationships [rt] :max-depth 7))
+    (println (paths/exprintlnts-between? conn (:id john) (:id liz) :relationships [rt] :max-depth 7))
     ;= false
-    (println (paths/exprintlnts-between? (:id beth) (:id bern) :relationships [rt] :max-depth 7))
+    (println (paths/exprintlnts-between? conn (:id beth) (:id bern) :relationships [rt] :max-depth 7))
     ;= nil
     (println path9)))
 ```
@@ -305,14 +307,14 @@ Another common operation is checking whether a path between two nodes exists at 
 
 (defn -main
   [& args]
-  (nr/connect! "http://localhost:7474/db/data/")
-  (let [john (nodes/create {:name "John"})
-        beth (nodes/create {:name "Elizabeth"})
-        gael (nodes/create {:name "Gaël"})
-        _    (relationships/create john beth :knows)
-        _    (relationships/create beth gael :knows)
+  (let [conn (nr/connect "http://localhost:7474/db/data/")
+        john (nn/create conn {:name "John"})
+        beth (nn/create conn {:name "Elizabeth"})
+        gael (nn/create conn {:name "Gaël"})
+        _    (nrl/create conn john beth :knows)
+        _    (nrl/create conn beth gael :knows)
         rt   {:type "knows" :direction "out"}]
-    (println (np/exists-between? (:id john) (:id gael) :relationships [rt] :max-depth 3))))
+    (println (np/exists-between? conn (:id john) (:id gael) :relationships [rt] :max-depth 3))))
 ```
 
 Relationship types that can be used (followed) during traversal are given via the `:relationships` option.

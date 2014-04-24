@@ -19,7 +19,7 @@ This work is licensed under a <a rel="license" href="http://creativecommons.org/
 
 ## What version of Neocons does this guide cover?
 
-This guide covers Neocons 2.0.
+This guide covers Neocons 3.0.
 
 
 ## Neocons Overview
@@ -40,12 +40,12 @@ in the future versions. Neocons may or may not be Web Scale and puts correctness
 
 ## Supported Clojure versions
 
-Neocons 2.0 requires Clojure 1.4+.
+Neocons 3.0 requires Clojure 1.4+.
 
 
 ## Supported Neo4J Server Versions
 
-Neocons 2.0+ targets Neo4J Server 2.0.
+Neocons 3.0+ targets Neo4J Server 2.0.
 
 Most features would work with Neo4J Server 1.6.0 but some features
 (including the Cypher language) may be specific to more recent
@@ -57,7 +57,7 @@ versions. The most recent Neo4J Server is thus recommended.
 ### With Leiningen
 
 ``` clojure
-[clojurewerkz/neocons "2.0.1"]
+[clojurewerkz/neocons "3.0.0"]
 ```
 
 ### With Maven
@@ -77,7 +77,7 @@ And then the dependency:
 <dependency>
   <groupId>clojurewerkz</groupId>
   <artifactId>neocons</artifactId>
-  <version>2.0.1</version>
+  <version>3.0.0</version>
 </dependency>
 ```
 
@@ -92,17 +92,19 @@ and important changes are announced
 
 Before you use Neocons, you need to connect to Neo4J Server. "Connect" here means "perform service discovery" since REST/HTTP services like Neo4J Server
 do not have a concept of persistent stateful connection, but we use a more common term for database clients here. For that, you use
-`clojurewerkz.neocons.rest/connect!` function:
+`clojurewerkz.neocons.rest/connect` function:
 
 ``` clojure
 (ns neocons.docs.examples
   (:require [clojurewerkz.neocons.rest :as nr]))
 
 ;; connects to the default Neo4J Server host/port/path
-(nr/connect! "http://localhost:7474/db/data/")
+(def conn (nr/connect "http://localhost:7474/db/data/"))
 ```
 
-Neocons uses implicit endpoint argument because most applications only ever use one Neo4J database.
+Beginning from Neocons 3.0.0, the connect method returns a `Connection` record. This record has information about
+neo4j service enpoints along with information about authentication parameters and a map containing (optional) http parameters.
+
 
 ### Authenticating
 
@@ -115,7 +117,7 @@ With Neocons, you can either pass credentials as user info in the connection URL
 
 ;; connects to a Neo4J Server neo4j.megacorp.internal with
 ;; username of "neocons" and password of "SEcRe7"
-(nr/connect! "http://neocons:SEcRe7@neo4j.megacorp.internal/db/data/")
+(def conn (nr/connect "http://neocons:SEcRe7@neo4j.megacorp.internal/db/data/"))
 ```
 
 Alternatively, if the connection URL does not have user info but `NEO4J_LOGIN` and `NEO4J_PASSWORD` environment variables are set,
@@ -144,9 +146,9 @@ Nodes are created using the `clojurewerkz.neocons.rest.nodes/create` function:
 
 (defn -main
   [& args]
-  (nr/connect! "http://localhost:7474/db/data/")
   ;; creates a node without properties
-  (let [node (nn/create)]
+  (let [conn  (nr/connect "http://localhost:7474/db/data/")
+        node  (nn/create conn)]
     (println node)))
 ```
 
@@ -159,9 +161,9 @@ Nodes typically have properties. They are passed to `clojurewerkz.neocons.rest.n
 
 (defn -main
   [& args]
-  (nr/connect! "http://localhost:7474/db/data/")
   ;; creates a node wit two properties
-  (let [node (nn/create {:url "http://clojureneo4j.info" :domain "clojureneo4j.info"})]
+  (let [conn  (nr/connect "http://localhost:7474/db/data/")
+        node  (nn/create conn {:url "http://clojureneo4j.info" :domain "clojureneo4j.info"})]
     (println node)))
 ```
 
@@ -189,11 +191,11 @@ relationship between them:
 
 (defn -main
   [& args]
-  (nr/connect! "http://localhost:7474/db/data/")
-  (let [page1 (nn/create {:url "http://clojurewerkz.org"})
-        page2 (nn/create {:url "http://clojureneo4j.info"})
+  (let [conn  (nr/connect "http://localhost:7474/db/data/")
+        page1 (nn/create conn {:url "http://clojurewerkz.org"})
+        page2 (nn/create conn {:url "http://clojureneo4j.info"})
         ;; a relationship that indicates that page1 links to page2
-        rel   (nrl/create page1 page2 :links)]
+        rel   (nrl/create conn page1 page2 :links)]
     (println rel)))
 ```
 
@@ -207,10 +209,10 @@ Relationships can have properties, just like nodes:
 
 (defn -main
   [& args]
-  (nr/connect! "http://localhost:7474/db/data/")
-  (let [amy (nn/create {:username "amy"})
-        bob (nn/create {:username "bob"})
-        rel (nrl/create amy bob :friend {:source "college"})]
+  (let [conn  (nr/connect "http://localhost:7474/db/data/")
+        amy   (nn/create conn {:username "amy"})
+        bob   (nn/create conn {:username "bob"})
+        rel   (nrl/create conn amy bob :friend {:source "college"})]
     (println rel)))
 ```
 
@@ -246,9 +248,9 @@ a node by id with `clojurewerkz.neocons.rest.nodes/get`:
 
 (defn -main
   [& args]
-  (nr/connect! "http://localhost:7474/db/data/")
-  (let [amy (nn/create {:username "amy"})]
-    (println (nn/get (:id amy)))))
+  (let [conn  (nr/connect "http://localhost:7474/db/data/")
+        amy   (nn/create conn {:username "amy"})]
+    (println (nn/get conn (:id amy)))))
 ```
 
 It returns a node value that is a Clojure map.
@@ -262,9 +264,10 @@ It's possible to fetch a node by id stored elsewhere:
 
 (defn -main
   [& args]
-  (nr/connect! "http://localhost:7474/db/data/")
+
   ;; fetches a node with id 42
-  (println (nn/get 42)))
+  (let [conn  (nr/connect "http://localhost:7474/db/data/")]
+    (println (nn/get conn 42))))
 ```
 
 
@@ -280,11 +283,11 @@ It's possible to fetch a node by id stored elsewhere:
 
 (defn -main
   [& args]
-  (nr/connect! "http://localhost:7474/db/data/")
-  (let [amy (nn/create {:username "amy"})
-        bob (nn/create {:username "bob"})
-        rel (nrl/create amy bob :friend {:source "college"})]
-    (println (nrl/get (:id rel)))))
+  (let [conn  (nr/connect "http://localhost:7474/db/data/")
+        amy   (nn/create conn {:username "amy"})
+        bob   (nn/create conn {:username "bob"})
+        rel   (nrl/create conn amy bob :friend {:source "college"})]
+    (println (nrl/get conn (:id rel)))))
 ```
 
 Neocons also provides other ways of fetching relationships (based on the start node and type, for example) that will be described
@@ -299,11 +302,11 @@ in detail the [Traversing the graph](/articles/traversing.html) guide. `clojurew
 
 (defn -main
   [& args]
-  (nr/connect! "http://localhost:7474/db/data/")
-  (let [amy (nn/create {:username "amy"})
-        bob (nn/create {:username "bob"})
-        _   (nrl/create amy bob :friend {:source "college"})]
-    (println (nrl/outgoing-for amy :types [:friend]))))
+  (let [conn  (nr/connect "http://localhost:7474/db/data/")
+        amy   (nn/create conn {:username "amy"})
+        bob   (nn/create conn {:username "bob"})
+        _     (nrl/create conn amy bob :friend {:source "college"})]
+    (println (nrl/outgoing-for conn amy :types [:friend]))))
 ```
 
 ``` clojure
@@ -314,11 +317,11 @@ in detail the [Traversing the graph](/articles/traversing.html) guide. `clojurew
 
 (defn -main
   [& args]
-  (nr/connect! "http://localhost:7474/db/data/")
-  (let [amy (nn/create {:username "amy"})
-        bob (nn/create {:username "bob"})
-        _   (nrl/create amy bob :friend {:source "college"})]
-    (println (nrl/incoming-for bob :types [:friend]))))
+  (let [conn  (nr/connect "http://localhost:7474/db/data/")
+        amy   (nn/create conn {:username "amy"})
+        bob   (nn/create conn {:username "bob"})
+        _     (nrl/create conn amy bob :friend {:source "college"})]
+    (println (nrl/incoming-for conn bob :types [:friend]))))
 ```
 
 Both accept a node and a collection of relationship types you are interested in as the `:types` option, returning a collection
@@ -351,11 +354,11 @@ to find all Amy's friends via Cypher:
 
 (defn -main
   [& args]
-  (nr/connect! "http://localhost:7474/db/data/")
-  (let [amy (nn/create {:username "amy"})
-        bob (nn/create {:username "bob"})
-        _   (nrl/create amy bob :friend {:source "college"})
-        res (cy/tquery "START person=node({sid}) MATCH person-[:friend]->friend RETURN friend" {:sid (:id amy)})]
+  (let [conn  (nr/connect "http://localhost:7474/db/data/")
+        amy   (nn/create conn  {:username "amy"})
+        bob   (nn/create conn {:username "bob"})
+        _     (nrl/create conn amy bob :friend {:source "college"})
+        res (cy/tquery conn "START person=node({sid}) MATCH person-[:friend]->friend RETURN friend" {:sid (:id amy)})]
     (println res)))
 ```
 
@@ -370,11 +373,11 @@ And here is how to get back usernames and ages of multiple people using Cypher:
 
 (defn -main
   [& args]
-  (nr/connect! "http://localhost:7474/db/data/")
-  (let [amy (nn/create {:username "amy" :age 27})
-        bob (nn/create {:username "bob" :age 28})
-        _   (nrl/create amy bob :friend {:source "college"})
-        res (cy/tquery "START x = node({ids}) RETURN x.username, x.age" {:ids (map :id [amy bob])})]
+  (let [conn  (nr/connect "http://localhost:7474/db/data/")
+        amy   (nn/create conn {:username "amy" :age 27})
+        bob   (nn/create conn {:username "bob" :age 28})
+        _     (nrl/create conn amy bob :friend {:source "college"})
+        res   (cy/tquery conn "START x = node({ids}) RETURN x.username, x.age" {:ids (map :id [amy bob])})]
     (println res)))
 ```
 
@@ -420,13 +423,13 @@ a node to start traversing from, relationships to follow and additional options 
 
 (defn -main
   [& args]
-  (nr/connect! "http://localhost:7474/db/data/")
-  (let [john (nn/create {:name "John"})
-        adam (nn/create {:name "Alan"})
-        pete (nn/create {:name "Peter"})
-        _    (nrl/create john adam :friend)
-        _    (nrl/create adam pete :friend)]
-    (println (nn/traverse (:id john) :relationships [{:direction "out" :type "friend"}] :return-filter {:language "builtin" :name "all_but_start_node"}))))
+  (let [conn  (nr/connect "http://localhost:7474/db/data/")
+        john  (nn/create conn {:name "John"})
+        adam  (nn/create conn {:name "Alan"})
+        pete  (nn/create conn {:name "Peter"})
+        _     (nrl/create conn john adam :friend)
+        _     (nrl/create conn adam pete :friend)]
+    (println (nn/traverse conn (:id john) :relationships [{:direction "out" :type "friend"}] :return-filter {:language "builtin" :name "all_but_start_node"}))))
 ```
 
 
@@ -443,13 +446,13 @@ counterpart that traverses nodes:
 
 (defn -main
   [& args]
-  (nr/connect! "http://localhost:7474/db/data/")
-  (let [john (nn/create {:name "John"})
-        adam (nn/create {:name "Alan"})
-        pete (nn/create {:name "Peter"})
-        _    (nrl/create john adam :friend)
-        _    (nrl/create adam pete :friend)]
-    (println (nrl/traverse (:id john) :relationships [{:direction "out" :type "friend"}]))))
+  (let [conn  (nr/connect "http://localhost:7474/db/data/")
+        john  (nn/create conn {:name "John"})
+        adam  (nn/create conn {:name "Alan"})
+        pete  (nn/create conn {:name "Peter"})
+        _     (nrl/create conn john adam :friend)
+        _     (nrl/create conn adam pete :friend)]
+    (println (nrl/traverse conn (:id john) :relationships [{:direction "out" :type "friend"}]))))
 ```
 
 
@@ -483,14 +486,14 @@ Another common operation is checking whether a path between two nodes exists at 
 
 (defn -main
   [& args]
-  (nr/connect! "http://localhost:7474/db/data/")
-  (let [john (nodes/create {:name "John"})
-        beth (nodes/create {:name "Elizabeth"})
-        gael (nodes/create {:name "Gaël"})
-        _    (relationships/create john beth :knows)
-        _    (relationships/create beth gael :knows)
-        rt   {:type "knows" :direction "out"}]
-    (println (np/exists-between? (:id john) (:id gael) :relationships [rt] :max-depth 3))))
+  (let [conn  (nr/connect "http://localhost:7474/db/data/")
+        john  (nn/create conn {:name "John"})
+        beth  (nn/create conn {:name "Elizabeth"})
+        gael  (nn/create conn {:name "Gaël"})
+        _     (nrl/create conn john beth :knows)
+        _     (nrl/create conn beth gael :knows)
+        rt    {:type "knows" :direction "out"}]
+    (println (np/exists-between? conn (:id john) (:id gael) :relationships [rt] :max-depth 3))))
 ```
 
 Relationship types that can be used (followed) during traversal are given via the `:relationships` option.
@@ -501,6 +504,79 @@ Relationship types that can be used (followed) during traversal are given via th
 While traversing features are powerful, they predate a newer, more generic and even more powerful Neo4J Server feature: the Cypher query language.
 With the introduction and several revisions on Cypher, in some situations traversing the graph is no longer necessary. Please keep this in mind.
 That said, some problems are easier to solve using traversing than sophisticated Cypher queries.
+
+
+## Debugging HTTP calls
+
+Neocons uses [clj-http](https://github.com/dakrone/clj-http) library for handling the actual HTTP interaction. clj-http exposes various options like `:debug` which can be accessed in the `:options` map of the `Connection` record.
+
+``` clojure
+(ns neocons.docs.examples
+  (:require [clojurewerkz.neocons.rest :as nr]
+            [clojurewerkz.neocons.rest.nodes :as nn]))
+
+(defn -main
+  [& args]
+  (let [conn   (nr/connect "http://localhost:7474/db/data/")
+        conn2  (assoc-in conn [:options :debug] true)]
+    (println (nr/create conn2 {:name "John"}))))
+```
+
+A possible output of the above program is:
+
+```
+Request: org.apache.http.entity.StringEntity
+{:user-info nil,
+ :use-header-maps-in-response? true,
+ :body-type org.apache.http.entity.StringEntity,
+ :debug true,
+ :headers
+ {"content-type" "application/json",
+  "accept" "application/json",
+  "accept-encoding" "gzip, deflate"},
+ :server-port 7474,
+ :http-url "http://localhost:7474/db/data/node",
+ :throw-entire-message? true,
+ :content-type :json,
+ :character-encoding "UTF-8",
+ :uri "/db/data/node",
+ :server-name "localhost",
+ :query-string nil,
+ :body
+ {:streaming false,
+  :repeatable true,
+  :contentType #<BasicHeader Content-Type: text/plain; charset=UTF-8>,
+  :contentLength 15,
+  :contentEncoding nil,
+  :content
+  #<ByteArrayInputStream java.io.ByteArrayInputStream@68f0d46>,
+  :class org.apache.http.entity.StringEntity,
+  :chunked false},
+ :scheme :http,
+ :request-method :post}
+HttpRequest:
+{:config nil,
+ :method "POST",
+ :requestLine
+ #<BasicRequestLine POST http://localhost:7474/db/data/node HTTP/1.1>,
+ :aborted false,
+ :params
+ #<BasicHttpParams org.apache.http.params.BasicHttpParams@1b47e68c>,
+ :protocolVersion #<HttpVersion HTTP/1.1>,
+ :URI #<URI http://localhost:7474/db/data/node>,
+ :class org.apache.http.client.methods.HttpPost,
+ :allHeaders
+ [#<BasicHeader Connection: close>,
+  #<BasicHeader content-type: application/json>,
+  #<BasicHeader accept: application/json>,
+  #<BasicHeader accept-encoding: gzip, deflate>],
+ :entity #<StringEntity org.apache.http.entity.StringEntity@5c6ca8e5>}
+
+#clojurewerkz.neocons.rest.records.Node{:id 2, :location-uri "http://localhost:7474/db/data/node/2", :data {:name "John"}, :relationships-uri nil, :create-relationship-uri "http://localhost:7474/db/data/node/2/relationships"}
+
+```
+
+For more information about the possible options, see [clj-http](https://github.com/dakrone/clj-http).
 
 
 ## Wrapping up
