@@ -102,8 +102,8 @@ do not have a concept of persistent stateful connection, but we use a more commo
 (def conn (nr/connect "http://localhost:7474/db/data/"))
 ```
 
-Beginning from Neocons 3.0.0, the connect method returns a `Connection` record. This record has information about the
-neo4j service enpoints along with information about authentication parameters and an map containing (optional) http parameters.
+Beginning from Neocons 3.0.0, the connect method returns a `Connection` record. This record has information about
+neo4j service enpoints along with information about authentication parameters and a map containing (optional) http parameters.
 
 
 ### Authenticating
