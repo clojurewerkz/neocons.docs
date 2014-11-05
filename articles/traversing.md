@@ -282,9 +282,9 @@ An example that demonstrates several of those functions:
     ;= false
     (println (paths/relationship-in? conn rel4 path7))
     ;= true
-    (println (paths/exprintlnts-between? conn (:id john) (:id liz) :relationships [rt] :max-depth 7))
+    (println (paths/exists-between? conn (:id john) (:id liz) :relationships [rt] :max-depth 7))
     ;= false
-    (println (paths/exprintlnts-between? conn (:id beth) (:id bern) :relationships [rt] :max-depth 7))
+    (println (paths/exists-between? conn (:id beth) (:id bern) :relationships [rt] :max-depth 7))
     ;= nil
     (println path9)))
 ```
