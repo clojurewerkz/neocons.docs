@@ -782,7 +782,9 @@ Neo4j 2.0 added the concept of
 [Labels](http://docs.neo4j.org/chunked/milestone/graphdb-neo4j-labels.html)
 and `clojurewerkz.neocons.rest.labels` implements that functionality
 [over HTTP
-API](http://docs.neo4j.org/chunked/milestone/rest-api-node-labels.html).
+API](http://docs.neo4j.org/chunked/milestone/rest-api-node-labels.html). A 
+label is not a property of a node; rather, it is a category that a node is 
+placed in to permit indexing and constraining of some property.
 
 An example which shows the basic functionality is listed below.
 
