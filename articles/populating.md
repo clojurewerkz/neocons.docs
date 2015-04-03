@@ -184,7 +184,7 @@ have met.
 ### Node properties
 
 Nodes properties are passed to the
-`clojurewerkz.neocons.rest.nodes/create` function when a ndoe is
+`clojurewerkz.neocons.rest.nodes/create` function when a node is
 created. In the following example, a node is created with two
 properties, `:url` and `:domain`:
 
@@ -754,7 +754,7 @@ For encapulating the commit-on-success and rollback-on-error pattern, you can us
 `clojurewerkz.neocons.rest.transaction/with-transaction` macro which has
 parameters: `transaction`, `commit-on-success?` and a `body`. If `commit-on-success?`
 is `false` then the user will have to manually commit the transaction. This can be
-useful if you wanted to test changes made by cypger statement without actually committing
+useful if you wanted to test changes made by cypher statement without actually committing
 them to the database. If there are any errors in the body or any cypher errors in
 any statement sent the server, the transaction will automatically be rolled back.
 
@@ -827,7 +827,7 @@ An example which shows the basic functionality is listed below.
 ## Schema & Constraints (Neo4J 2.0+)
 
 Since Neo4j 2.0, you can add schema meta information for speed
-improvements or modelling benefits. They fall into two categories,
+improvements or modeling benefits. They fall into two categories,
 Indices and Constraints.  These features are very new and subject to
 change.
 
@@ -875,7 +875,7 @@ An example which shows the basic functionality is listed below.
     ; create an uniqueness constraint on a label and a property name
     (nc/create-unique conn "Person" :name)
 
-    ; get an existing uniquness constraint on a label and a property name
+    ; get an existing uniqueness constraint on a label and a property name
     (println (nc/get-unique conn "Person" :name))
 
     ; get all existing uniquness constraints on a label
