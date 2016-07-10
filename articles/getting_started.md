@@ -57,7 +57,13 @@ versions. The most recent Neo4J Server is thus recommended.
 ### With Leiningen
 
 ``` clojure
-[clojurewerkz/neocons "3.0.0"]
+[clojurewerkz/neocons "3.1.0"]
+```
+
+or 
+
+``` clojure
+[clojurewerkz/neocons "3.1.0-beta3"]
 ```
 
 ### With Maven
