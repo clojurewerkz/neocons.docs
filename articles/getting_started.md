@@ -60,12 +60,6 @@ versions. The most recent Neo4J Server is thus recommended.
 [clojurewerkz/neocons "3.1.0"]
 ```
 
-or 
-
-``` clojure
-[clojurewerkz/neocons "3.1.0-beta3"]
-```
-
 ### With Maven
 
 Add Clojars repository definition to your `pom.xml`:
