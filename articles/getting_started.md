@@ -45,7 +45,7 @@ Neocons 3.2 requires Clojure 1.8+.
 
 ## Supported Neo4J Server Versions
 
-Neocons 3.0+ targets Neo4J Server 2.0.
+Neocons 3.2 targets Neo4J Server 3.x.
 
 Most features would work with Neo4J Server 1.6.0 but some features
 (including the Cypher language) may be specific to more recent
