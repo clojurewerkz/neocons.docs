@@ -19,7 +19,7 @@ This work is licensed under a <a rel="license" href="http://creativecommons.org/
 
 ## What version of Neocons does this guide cover?
 
-This guide covers Neocons 3.0.
+This guide covers Neocons 3.2.
 
 
 ## Neocons Overview
@@ -40,7 +40,7 @@ in the future versions. Neocons may or may not be Web Scale and puts correctness
 
 ## Supported Clojure versions
 
-Neocons 3.0 requires Clojure 1.4+.
+Neocons 3.2 requires Clojure 1.8+.
 
 
 ## Supported Neo4J Server Versions
@@ -57,7 +57,7 @@ versions. The most recent Neo4J Server is thus recommended.
 ### With Leiningen
 
 ``` clojure
-[clojurewerkz/neocons "3.1.0"]
+[clojurewerkz/neocons "3.2.0"]
 ```
 
 ### With Maven
@@ -77,7 +77,7 @@ And then the dependency:
 <dependency>
   <groupId>clojurewerkz</groupId>
   <artifactId>neocons</artifactId>
-  <version>"3.0.0</version>
+  <version>"3.2.0</version>
 </dependency>
 ```
 
