@@ -125,6 +125,8 @@ Neocons will use them.
 
 Related Neo4J Server guide: [Securing Access to Neo4J Server](http://docs.neo4j.org/chunked/stable/security-server.html)
 
+If you are using Neo4j from behind a proxy server, please refer to [Neo4j Server Configuration](http://docs.neo4j.org/chunked/stable/server-configuration.html#_using_x_forwarded_proto_and_x_forwarded_host_to_parameterize_the_base_uri_for_rest_responses)
+
 
 ## A very short intro to graph databases
 
